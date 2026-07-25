@@ -1,0 +1,17 @@
+{
+  "name": "trafegoai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TrafegoAI — Gestor de tráfego pago (Google, Meta, TikTok) com IA + máquina de inteligência de tendências",
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:api": "npm --workspace apps/api run start:dev",
+    "build:web": "npm --workspace apps/web run build",
+    "build:api": "npm --workspace apps/api run build",
+    "test": "npm --workspace apps/api run test"
+  }
+}

@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 10 12 20;
+  --surface: 17 20 33;
+  --surface2: 24 28 44;
+  --border: 38 44 66;
+  --fg: 233 236 245;
+  --muted: 148 156 180;
+  --brand: 124 92 255;
+  --brand-soft: 60 48 120;
+  --good: 34 197 94;
+  --warn: 245 158 11;
+  --bad: 239 68 68;
+}
+
+.light {
+  --bg: 244 246 251;
+  --surface: 255 255 255;
+  --surface2: 240 242 248;
+  --border: 224 228 238;
+  --fg: 20 24 38;
+  --muted: 100 108 130;
+  --brand: 108 74 255;
+  --brand-soft: 224 218 255;
+  --good: 22 163 74;
+  --warn: 217 119 6;
+  --bad: 220 38 38;
+}
+
+* {
+  border-color: rgb(var(--border));
+}
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--fg));
+  -webkit-font-smoothing: antialiased;
+}
+
+.card {
+  @apply rounded-2xl border bg-surface p-5;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-brand/60;
+}
+.btn-primary {
+  @apply btn bg-brand text-white hover:bg-brand/90;
+}
+.btn-ghost {
+  @apply btn border bg-surface2 text-fg hover:bg-surface;
+}
+.badge {
+  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+.input {
+  @apply w-full rounded-xl border bg-surface2 px-3 py-2 text-sm text-fg placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand/50;
+}
+.label {
+  @apply mb-1 block text-xs font-medium text-muted;
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+.skeleton {
+  @apply relative overflow-hidden rounded-lg bg-surface2;
+}
+.skeleton::after {
+  content: "";
+  @apply absolute inset-0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(var(--border) / 0.6), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+/* estilos dedicados de impressão (export PDF via navegador) */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; color: black; }
+  .card { border: 1px solid #ddd; box-shadow: none; }
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgb(var(--border)); border-radius: 8px; }

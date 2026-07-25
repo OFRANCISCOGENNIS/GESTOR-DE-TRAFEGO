@@ -1,0 +1,197 @@
+// Schema completo do TrafegoAI. Métricas normalizadas no modelo comum MetricDaily
+// (nível conta/campanha/conjunto/anúncio). ROAS/CPA/CPC/CPM/CTR são derivados na leitura.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Platform {
+  google
+  meta
+  tiktok
+}
+
+enum EntityLevel {
+  account
+  campaign
+  adset
+  ad
+}
+
+enum Role {
+  admin
+  manager
+  viewer
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  plan      String   @default("starter")
+  createdAt DateTime @default(now())
+  users     User[]
+  clients   Client[]
+}
+
+model User {
+  id       String       @id @default(cuid())
+  email    String       @unique
+  name     String
+  password String // hash
+  role     Role         @default(admin)
+  orgId    String
+  org      Organization @relation(fields: [orgId], references: [id])
+}
+
+model Client {
+  id          String       @id @default(cuid())
+  name        String
+  logoColor   String       @default("#7c5cff")
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id])
+  connections Connection[]
+  campaigns   Campaign[]
+  goals       Goal[]
+  reports     Report[]
+}
+
+model Connection {
+  id           String   @id @default(cuid())
+  platform     Platform
+  accountName  String
+  status       String   @default("active") // active | expired | error
+  // Tokens OAuth criptografados em repouso (AES-256-GCM). Nunca em texto puro.
+  accessToken  String? // formato: iv:authTag:ciphertext (base64)
+  refreshToken String?
+  lastSync     DateTime @default(now())
+  clientId     String
+  client       Client   @relation(fields: [clientId], references: [id])
+}
+
+model Campaign {
+  id          String   @id @default(cuid())
+  externalId  String?
+  name        String
+  platform    Platform
+  status      String   @default("active") // active | paused | learning
+  budgetDaily Float    @default(0)
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id])
+  adSets      AdSet[]
+  metrics     MetricDaily[]
+}
+
+model AdSet {
+  id         String   @id @default(cuid())
+  name       String
+  status     String   @default("active")
+  targeting  Json
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  ads        Ad[]
+  metrics    MetricDaily[]
+}
+
+model Ad {
+  id           String   @id @default(cuid())
+  name         String
+  status       String   @default("active")
+  thumbnail    String   @default("🎬")
+  adSetId      String
+  adSet        AdSet    @relation(fields: [adSetId], references: [id])
+  metrics      MetricDaily[]
+}
+
+// Schema comum normalizado. Um registro por dia por entidade.
+model MetricDaily {
+  id          String      @id @default(cuid())
+  date        DateTime
+  level       EntityLevel
+  spend       Float       @default(0)
+  revenue     Float       @default(0)
+  impressions Int         @default(0)
+  clicks      Int         @default(0)
+  conversions Int         @default(0)
+  frequency   Float       @default(0)
+  campaignId  String?
+  campaign    Campaign?   @relation(fields: [campaignId], references: [id])
+  adSetId     String?
+  adSet       AdSet?      @relation(fields: [adSetId], references: [id])
+  adId        String?
+  ad          Ad?         @relation(fields: [adId], references: [id])
+
+  @@index([date, level])
+}
+
+model Rule {
+  id           String    @id @default(cuid())
+  name         String
+  enabled      Boolean   @default(true)
+  condition    String
+  action       String
+  budgetFloor  Float     @default(0)
+  budgetCap    Float     @default(0)
+  maxChangePct Float     @default(20)
+  fires        Int       @default(0)
+  lastRun      DateTime?
+}
+
+model Recommendation {
+  id            String @id @default(cuid())
+  title         String
+  why           String
+  action        String
+  impact        String
+  estimatedGain String
+  platform      Platform
+  status        String @default("open") // open | applied | dismissed
+}
+
+model Anomaly {
+  id       String   @id @default(cuid())
+  metric   String
+  severity String
+  message  String
+  zscore   Float
+  at       DateTime @default(now())
+}
+
+model Goal {
+  id                 String @id @default(cuid())
+  label              String
+  metric             String // roas | cpa | budget
+  target             Float
+  current            Float
+  projectedEndOfMonth Float
+  clientId           String
+  client             Client @relation(fields: [clientId], references: [id])
+}
+
+model Report {
+  id         String   @id @default(cuid())
+  name       String
+  shareToken String   @unique
+  createdAt  DateTime @default(now())
+  clientId   String
+  client     Client   @relation(fields: [clientId], references: [id])
+}
+
+model AuditLog {
+  id     String   @id @default(cuid())
+  action String
+  target String
+  user   String
+  at     DateTime @default(now())
+}
+
+model Notification {
+  id      String   @id @default(cuid())
+  kind    String
+  message String
+  read    Boolean  @default(false)
+  at      DateTime @default(now())
+}

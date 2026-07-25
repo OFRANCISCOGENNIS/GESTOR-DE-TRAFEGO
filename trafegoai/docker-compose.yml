@@ -1,0 +1,62 @@
+# Sobe todo o TrafegoAI com um comando: docker compose up
+# Serviços: postgres, redis, api, worker, web. Seed automático no primeiro boot.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: trafegoai
+      POSTGRES_PASSWORD: trafegoai
+      POSTGRES_DB: trafegoai
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trafegoai"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    environment:
+      DATABASE_URL: postgresql://trafegoai:trafegoai@postgres:5432/trafegoai
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: troque-em-producao
+      ENCRYPTION_KEY: troque-esta-chave-de-32-bytes-aqui
+      PORT: 3333
+      WEB_ORIGIN: http://localhost:3000
+    ports: ["3333:3333"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    # migra + seed no primeiro boot, depois sobe a API
+    command: sh -c "npx prisma migrate deploy && node dist/seed.js || npx ts-node prisma/seed.ts; node dist/main.js"
+
+  worker:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    environment:
+      DATABASE_URL: postgresql://trafegoai:trafegoai@postgres:5432/trafegoai
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      api: { condition: service_started }
+      redis: { condition: service_healthy }
+    command: node dist/worker.main.js
+
+  web:
+    build: { context: ., dockerfile: apps/web/Dockerfile }
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3333
+    ports: ["3000:3000"]
+    depends_on:
+      api: { condition: service_started }
+
+volumes:
+  pgdata:
