@@ -156,6 +156,29 @@ export interface Client {
   logoColor: string;
 }
 
+export interface ManagementStep {
+  id: string;
+  title: string;
+  description: string;
+  done: boolean;
+  href: string;
+  cta: string;
+}
+
+export interface ClientProfile {
+  client: Client;
+  contact: { owner: string; email: string; phone: string; segment: string; since: string };
+  kpi: Kpi;
+  connections: Connection[];
+  campaigns: Campaign[];
+  goals: Goal[];
+  openRecommendations: number;
+  activeRules: number;
+  hasReport: boolean;
+  guide: ManagementStep[];
+  health: { score: number; label: string };
+}
+
 export interface Connection {
   id: string;
   platform: Platform;
