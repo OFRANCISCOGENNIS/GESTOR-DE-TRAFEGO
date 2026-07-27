@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>TrafegoAI — Gestor de tráfego pago com IA</title>
+<meta name="description" content="Google, Meta e TikTok Ads em um só painel, otimizados por IA. Demonstração interativa.">
+
+<style>
+  :root{
+    --bg:#f6f7fb; --surface:#ffffff; --surface2:#eef1f8; --border:#e3e7f1;
+    --fg:#161a27; --muted:#5c6379;
+    --brand:#6d4aff; --brand2:#9a7bff; --brand-soft:#ece7ff;
+    --good:#16a34a; --warn:#d97706; --bad:#dc2626;
+    --shadow:0 1px 2px rgba(20,26,50,.06),0 8px 24px rgba(20,26,50,.06);
+    --r:16px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0a0d16; --surface:#121727; --surface2:#1a2036; --border:#262d43;
+      --fg:#e9ecf5; --muted:#949cb4;
+      --brand:#8b6dff; --brand2:#6d4aff; --brand-soft:#221c3f;
+      --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#f6f7fb; --surface:#ffffff; --surface2:#eef1f8; --border:#e3e7f1;
+    --fg:#161a27; --muted:#5c6379; --brand:#6d4aff; --brand2:#9a7bff; --brand-soft:#ece7ff;
+    --good:#16a34a; --warn:#d97706; --bad:#dc2626;
+    --shadow:0 1px 2px rgba(20,26,50,.06),0 8px 24px rgba(20,26,50,.06);
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a0d16; --surface:#121727; --surface2:#1a2036; --border:#262d43;
+    --fg:#e9ecf5; --muted:#949cb4; --brand:#8b6dff; --brand2:#6d4aff; --brand-soft:#221c3f;
+    --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.5;
+  }
+  .num{font-variant-numeric:tabular-nums}
+  h1,h2,h3{margin:0;letter-spacing:-.02em;font-weight:750}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:8px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* ── shell ── */
+  .app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+  .side{
+    position:sticky;top:0;height:100vh;background:var(--surface);border-right:1px solid var(--border);
+    padding:18px 14px;display:flex;flex-direction:column;gap:4px
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 16px}
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));
+    display:grid;place-items:center;color:#fff;flex:0 0 auto}
+  .brand b{font-size:18px;letter-spacing:-.03em}
+  .nav{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+  .nav button{
+    display:flex;align-items:center;gap:11px;width:100%;padding:9px 11px;border:0;border-radius:11px;
+    background:transparent;color:var(--muted);font-size:14px;font-weight:550;text-align:left;transition:.15s
+  }
+  .nav button:hover{background:var(--surface2);color:var(--fg)}
+  .nav button.on{background:var(--brand);color:#fff}
+  .nav button.on svg{color:#fff}
+  .nav svg{width:18px;height:18px;flex:0 0 auto}
+  .side .foot{margin-top:auto;font-size:11px;color:var(--muted);padding:8px;line-height:1.5}
+
+  .main{min-width:0;display:flex;flex-direction:column}
+  .top{
+    position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 24px;background:color-mix(in srgb,var(--surface) 82%,transparent);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--border)
+  }
+  .content{padding:22px 24px 60px;max-width:1180px;width:100%}
+  .pagehead{margin-bottom:18px}
+  .pagehead h1{font-size:24px}
+  .pagehead p{margin:5px 0 0;color:var(--muted);font-size:14px}
+
+  /* ── atoms ── */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+  .grid{display:grid;gap:14px}
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600}
+  .pill.g{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
+  .pill.w{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+  .pill.b{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+  .pill.m{background:var(--surface2);color:var(--muted)}
+  .pill.v{background:var(--brand-soft);color:var(--brand)}
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:11px;border:1px solid var(--border);
+    background:var(--surface2);color:var(--fg);font-size:13.5px;font-weight:600;transition:.15s}
+  .btn:hover{border-color:var(--brand)}
+  .btn.p{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn.p:hover{filter:brightness(1.07)}
+  .btn.sm{padding:6px 10px;font-size:12.5px;border-radius:9px}
+  .iconbtn{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--fg)}
+  .iconbtn:hover{border-color:var(--brand)}
+  .up{color:var(--good)} .down{color:var(--bad)}
+  .lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+  .kpi .v{font-size:23px;font-weight:800;letter-spacing:-.03em;margin-top:3px}
+  .kpi .d{font-size:11.5px;font-weight:600;margin-top:4px;display:flex;align-items:center;gap:3px}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;padding:10px 10px}
+  td{padding:11px 10px;border-top:1px solid var(--border)}
+  tbody tr:hover{background:var(--surface2)}
+  .twrap{overflow-x:auto}
+
+  .demo-tag{font-size:11px}
+  .row{display:flex;align-items:center;gap:10px}
+  .between{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .muted{color:var(--muted)}
+  .clickable{cursor:pointer;transition:.15s}
+  .clickable:hover{border-color:var(--brand);transform:translateY(-1px)}
+  .bar{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden}
+  .bar>i{display:block;height:100%;background:var(--brand);border-radius:99px}
+  .step{display:flex;gap:12px;align-items:flex-start}
+  .stepnum{flex:0 0 auto}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);
+    box-shadow:var(--shadow);padding:11px 16px;border-radius:12px;font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .avatar{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:800;flex:0 0 auto}
+  .divider{height:1px;background:var(--border);margin:14px 0}
+  .link{color:var(--brand);font-weight:600;cursor:pointer}
+  .anim{animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  @media(max-width:880px){
+    .app{grid-template-columns:1fr}
+    .side{position:fixed;z-index:50;width:250px;transform:translateX(-100%);transition:.2s;box-shadow:var(--shadow)}
+    .side.open{transform:none}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .col2{grid-template-columns:1fr!important}
+    .menu-btn{display:grid!important}
+    .scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:45}
+    .scrim.on{display:block}
+  }
+  .menu-btn{display:none}
+</style>
+
+<div class="app">
+  <aside class="side" id="side">
+    <div class="brand">
+      <span class="logo">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
+      </span>
+      <b>TrafegoAI</b>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="foot">Demonstração • dados fictícios<br>Google · Meta · TikTok</div>
+  </aside>
+  <div class="scrim" id="scrim" onclick="toggleMenu()"></div>
+
+  <div class="main">
+    <header class="top">
+      <div class="row">
+        <button class="iconbtn menu-btn" onclick="toggleMenu()" aria-label="Menu">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <span class="pill v demo-tag">Modo demonstração</span>
+      </div>
+      <button class="iconbtn" id="themeBtn" onclick="toggleTheme()" aria-label="Alternar tema"></button>
+    </header>
+    <main class="content" id="view"></main>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ────────────────────────────────────────────────────────────────
+   TrafegoAI — app de demonstração (100% no navegador, sem backend).
+   Roteamento simples + camada de dados fictícios estável (RNG seeded).
+──────────────────────────────────────────────────────────────── */
+const BRL = n => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n);
+const CMP = n => new Intl.NumberFormat('pt-BR',{notation:'compact',maximumFractionDigits:1}).format(n);
+const NUM = n => new Intl.NumberFormat('pt-BR').format(Math.round(n));
+const el = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild;};
+
+// RNG determinístico
+function rng(seed){return function(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};}
+const R=rng(20260727); const rr=(a,b)=>a+R()*(b-a); const ri=(a,b)=>Math.floor(rr(a,b+1));
+const pick=a=>a[ri(0,a.length-1)];
+
+// ── seed de dados ──
+const PLAT={google:{n:'Google',c:'#4285F4'},meta:{n:'Meta',c:'#3b82f6'},tiktok:{n:'TikTok',c:'#14b8a6'}};
+const clients=[
+  {id:'c1',name:'Loja Aurora',color:'#6d4aff',owner:'Marina Alves',email:'marina@lojaaurora.com.br',phone:'(11) 98888-1201',seg:'E-commerce de moda',since:'jan/2025'},
+  {id:'c2',name:'FitPro Suplementos',color:'#16a34a',owner:'Rafael Nunes',email:'rafael@fitprosupps.com',phone:'(21) 97777-3410',seg:'Suplementos / saúde',since:'mar/2025'},
+  {id:'c3',name:'Studio Bela Pele',color:'#d97706',owner:'Camila Rocha',email:'camila@studiobelapele.com',phone:'(31) 96666-5588',seg:'Estética / skincare',since:'set/2025'},
+];
+const cnames=['Remarketing Quente','Prospecção Fria','Escala Vencedora','Catálogo Dinâmico','Vídeo Depoimento','Público Semelhante 1%','Retargeting Carrinho','Topo de Funil'];
+const platArr=['google','meta','tiktok'];
+let campaigns=[];
+clients.forEach((cl,ci)=>{
+  for(let k=0;k<4;k++){
+    const spend=rr(2200,9000), roas=rr(1.2,5.2), rev=spend*roas, clicks=Math.round(spend*rr(3,7)),
+      imp=Math.round(clicks*rr(60,120)), conv=Math.max(1,Math.round(clicks*rr(.03,.11)));
+    campaigns.push({
+      id:cl.id+'-k'+k, client:cl.id, name:pick(cnames)+' '+(k+1),
+      plat:platArr[(ci+k)%3], status:k===3?'paused':k===2?'learning':'active',
+      spend, rev, roas:+roas.toFixed(2), cpa:+(spend/conv).toFixed(2), ctr:+(clicks/imp*100).toFixed(2),
+      conv, clicks, imp, budget:Math.round(rr(80,500)), freq:+rr(1.4,6).toFixed(1)
+    });
+  }
+});
+const connections=[
+  {id:'x1',client:'c1',plat:'google',acc:'Loja Aurora — Google Ads',status:'active',sync:'há 6 min'},
+  {id:'x2',client:'c1',plat:'meta',acc:'Loja Aurora — Meta Business',status:'active',sync:'há 6 min'},
+  {id:'x3',client:'c2',plat:'tiktok',acc:'FitPro — TikTok Ads',status:'active',sync:'há 12 min'},
+  {id:'x4',client:'c2',plat:'meta',acc:'FitPro — Meta Business',status:'expired',sync:'há 2 dias'},
+  {id:'x5',client:'c3',plat:'google',acc:'Bela Pele — Google Ads',status:'error',sync:'há 4 h'},
+  {id:'x6',client:'c3',plat:'meta',acc:'Bela Pele — Meta Business',status:'active',sync:'há 20 min'},
+];
+const goals=[
+  {client:'c1',label:'ROAS Loja Aurora',metric:'roas',cur:3.1,tgt:3.5,proj:3.6},
+  {client:'c1',label:'Orçamento mensal',metric:'budget',cur:21400,tgt:30000,proj:29800},
+  {client:'c2',label:'CPA-alvo FitPro',metric:'cpa',cur:47,tgt:40,proj:42},
+];
+let recs=[
+  {id:'r1',title:'Realocar 20% da verba p/ "Escala Vencedora"',impact:'alto',plat:'meta',why:'ROAS 4,8 vs média 2,1; ainda com espaço de escala e frequência saudável.',gain:'+R$ 3.400/mês',status:'open'},
+  {id:'r2',title:'Pausar conjunto "Prospecção Fria 3"',impact:'alto',plat:'google',why:'CPA R$ 92 (meta R$ 45) há 9 dias, sem conversões nos últimos 3.',gain:'−R$ 1.900 desperdício',status:'open'},
+  {id:'r3',title:'Trocar criativo com fadiga em "Vídeo Depoimento"',impact:'médio',plat:'tiktok',why:'CTR caiu 38% e a frequência subiu para 5,8 nos últimos 14 dias.',gain:'+0,6 pt CTR',status:'open'},
+  {id:'r4',title:'Concentrar lances no pico das 19h–22h',impact:'médio',plat:'google',why:'72% das conversões acontecem nesse intervalo, com CPA 31% menor.',gain:'−14% CPA',status:'open'},
+];
+const products=[
+  {name:'Mini projetor portátil',cat:'Eletrônicos',mkt:'TikTok Shop',country:'Brasil',score:94,g:120,pmin:89,pmax:249,comp:'média',insight:'Unboxing no escuro + prova social. Vale tráfego pago em Reels/TikTok.'},
+  {name:'Escova alisadora 3 em 1',cat:'Beleza',mkt:'Shopee',country:'Brasil',score:88,g:64,pmin:59,pmax:159,comp:'alta',insight:'Antes/depois em 15s. Feminino 25-44. ROAS alto em Advantage+.'},
+  {name:'Garrafa térmica 2L',cat:'Fitness',mkt:'Mercado Livre',country:'Portugal',score:81,g:41,pmin:39,pmax:99,comp:'baixa',insight:'Trend de hidratação. UGC + desconto por tempo. Bom p/ Spark Ads.'},
+  {name:'Massageador EMS de pescoço',cat:'Saúde',mkt:'Amazon',country:'México',score:77,g:33,pmin:79,pmax:199,comp:'média',insight:'Dor de trabalho remoto. Depoimento + garantia. Meta + Shopping.'},
+];
+const videos=[
+  {t:'Ela testou por 30 dias e...',net:'TikTok',views:2400000,g:180,fmt:'Depoimento 9:16',hook:'"Não acreditava até ver o resultado no dia 7."',why:'Curiosidade + timeline concreta prendem nos 3s.'},
+  {t:'3 erros que queimam sua verba',net:'Reels',views:980000,g:96,fmt:'Educativo rápido',hook:'"O erro nº 2 custou R$ 4 mil pro meu cliente."',why:'Perda + número específico geram medo e autoridade.'},
+  {t:'POV: seu anúncio finalmente vendeu',net:'Shorts',views:1350000,g:210,fmt:'POV humor',hook:'Corte seco no problema, sem intro.',why:'Formato POV + humor elevam retenção e compartilhamento.'},
+  {t:'Unboxing do produto que viralizou',net:'YouTube',views:640000,g:58,fmt:'Unboxing',hook:'"Comprei o mais vendido do TikTok Shop."',why:'Ancoragem no viral + entrega de expectativa.'},
+];
+let rules=[
+  {id:'l1',name:'Pausar conjunto caro',on:true,cond:'CPA > R$ 60 por 3 dias',act:'Pausar conjunto',floor:20,cap:500,maxpct:100,fires:3,last:'há 12 min'},
+  {id:'l2',name:'Escalar vencedora',on:true,cond:'ROAS > 4 e frequência < 3',act:'Aumentar verba +20%',floor:50,cap:600,maxpct:20,fires:5,last:'há 12 min'},
+  {id:'l3',name:'Proteger orçamento',on:false,cond:'Gasto diário > teto',act:'Pausar campanha',floor:0,cap:400,maxpct:100,fires:0,last:null},
+];
+const windows=[
+  {net:'TikTok',hours:['12h','19h','21h'],note:'Pico de retenção à noite; testes ao meio-dia.'},
+  {net:'Instagram Reels',hours:['11h','13h','20h'],note:'Almoço e pós-jantar convertem melhor.'},
+  {net:'YouTube Shorts',hours:['18h','20h','22h'],note:'Consumo cresce à noite; alinhe com horário de compra.'},
+];
+// série 30 dias agregada
+const series=Array.from({length:30},(_,i)=>{const base=12000*(1+i*.006)*rr(.9,1.12);return{spend:Math.round(base),rev:Math.round(base*rr(1.8,3.2))};});
+const guideDone={}; // estado do guia por cliente
+
+// ── agregações ──
+const sum=(arr,f)=>arr.reduce((a,x)=>a+f(x),0);
+function totals(list){
+  const spend=sum(list,c=>c.spend), rev=sum(list,c=>c.rev), conv=sum(list,c=>c.conv),
+    clicks=sum(list,c=>c.clicks), imp=sum(list,c=>c.imp);
+  return{spend,rev,roas:spend?+(rev/spend).toFixed(2):0,roi:spend?+((rev/spend-1)*100).toFixed(0):0,
+    cpa:conv?+(spend/conv).toFixed(2):0,cpc:clicks?+(spend/clicks).toFixed(2):0,cpm:imp?+(spend/imp*1000).toFixed(2):0,
+    ctr:imp?+(clicks/imp*100).toFixed(2):0,cr:clicks?+(conv/clicks*100).toFixed(2):0,conv,clicks,imp};
+}
+
+// ── charts (SVG) ──
+function areaChart(data){
+  const W=680,H=210,pad=8, max=Math.max(...data.map(d=>Math.max(d.spend,d.rev)))*1.08;
+  const x=i=>pad+i*(W-2*pad)/(data.length-1), y=v=>H-pad-(v/max)*(H-2*pad);
+  const path=(k)=>data.map((d,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(d[k]).toFixed(1)).join(' ');
+  const area='M'+x(0)+' '+y(data[0].rev)+data.map((d,i)=>'L'+x(i).toFixed(1)+' '+y(d.rev).toFixed(1)).join('')+'L'+x(data.length-1)+' '+(H-pad)+'L'+pad+' '+(H-pad)+'Z';
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="none" style="display:block">
+    <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--brand)" stop-opacity=".33"/><stop offset="1" stop-color="var(--brand)" stop-opacity="0"/></linearGradient></defs>
+    ${[.25,.5,.75].map(f=>`<line x1="${pad}" x2="${W-pad}" y1="${H*f}" y2="${H*f}" stroke="var(--border)" stroke-dasharray="3 4"/>`).join('')}
+    <path d="${area}" fill="url(#ga)"/>
+    <path d="${path('rev')}" fill="none" stroke="var(--brand)" stroke-width="2.4"/>
+    <path d="${path('spend')}" fill="none" stroke="var(--warn)" stroke-width="2" stroke-dasharray="1 0"/>
+    <circle cx="${x(data.length-1)}" cy="${y(data[data.length-1].rev)}" r="4" fill="var(--brand)"/>
+  </svg>`;
+}
+function donut(segs){
+  const tot=sum(segs,s=>s.v)||1; let a=-Math.PI/2; const R0=52,R1=78,cx=95,cy=95; let out='';
+  segs.forEach(s=>{const ang=s.v/tot*Math.PI*2,b=a+ang;
+    const p=(r,t)=>[cx+r*Math.cos(t),cy+r*Math.sin(t)]; const large=ang>Math.PI?1:0;
+    const[x0,y0]=p(R1,a),[x1,y1]=p(R1,b),[x2,y2]=p(R0,b),[x3,y3]=p(R0,a);
+    out+=`<path d="M${x0} ${y0} A${R1} ${R1} 0 ${large} 1 ${x1} ${y1} L${x2} ${y2} A${R0} ${R0} 0 ${large} 0 ${x3} ${y3}Z" fill="${s.c}"/>`;a=b;});
+  return `<svg viewBox="0 0 190 190" width="170" height="170">${out}</svg>`;
+}
+function spark(vals){
+  const W=150,H=40,max=Math.max(...vals),min=Math.min(...vals),rng=max-min||1;
+  const x=i=>i*W/(vals.length-1),y=v=>H-2-((v-min)/rng)*(H-6);
+  const d=vals.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="40"><path d="${d}" fill="none" stroke="var(--brand)" stroke-width="2"/></svg>`;
+}
+function heatmap(){
+  const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];let out='<div style="display:grid;gap:3px">';
+  for(let d=0;d<7;d++){out+='<div style="display:grid;grid-template-columns:34px repeat(24,1fr);gap:2px;align-items:center">';
+    out+=`<span class="lbl" style="font-size:10px">${days[d]}</span>`;
+    for(let h=0;h<24;h++){const peak=(h>=18&&h<=22)?1.8:(h>=11&&h<=14)?1.2:.5;const wk=(d===0||d===6)?1.2:1;
+      const v=Math.min(1,peak*wk*rr(.5,1.1)/2.2);
+      out+=`<span title="${days[d]} ${h}h" style="aspect-ratio:1;border-radius:3px;background:color-mix(in srgb,var(--brand) ${Math.round(8+v*88)}%,transparent)"></span>`;}
+    out+='</div>';}
+  return out+'</div>';
+}
+
+// ── componentes ──
+function statusPill(s){const m={active:['g','Ativa'],paused:['m','Pausada'],learning:['w','Aprendendo'],expired:['w','Expirada'],error:['b','Com erro']};const[c,t]=m[s]||['m',s];return `<span class="pill ${c}">${t}</span>`;}
+function platPill(p){return `<span class="pill" style="background:color-mix(in srgb,${PLAT[p].c} 16%,transparent);color:${PLAT[p].c}">${PLAT[p].n}</span>`;}
+function deltaEl(d,invert){const up=d>=0,good=invert?!up:up;return `<span class="d ${good?'up':'down'}">${up?'▲':'▼'} ${Math.abs(d)}%</span>`;}
+function kpi(label,val,d,invert){return `<div class="card kpi"><div class="lbl">${label}</div><div class="v num">${val}</div>${d!==undefined?deltaEl(d,invert):''}</div>`;}
+
+// ── telas ──
+function head(t,s){return `<div class="pagehead"><h1>${t}</h1><p>${s}</p></div>`;}
+
+function viewDashboard(){
+  const t=totals(campaigns);const d=()=>+(rr(-18,26)).toFixed(1);
+  const best=[...campaigns].sort((a,b)=>b.roas-a.roas)[0], worst=[...campaigns].sort((a,b)=>a.roas-b.roas)[0];
+  const segs=platArr.map(p=>({c:PLAT[p].c,n:PLAT[p].n,v:sum(campaigns.filter(c=>c.plat===p),c=>c.spend)}));
+  return head('Dashboard unificado','Google + Meta + TikTok consolidados, com comparação vs. período anterior.')+`
+  <div class="kpis" style="margin-bottom:14px">
+    ${kpi('Investimento',BRL(t.spend),d(),true)}${kpi('Receita',BRL(t.rev),d())}
+    ${kpi('ROAS',t.roas+'x',d())}${kpi('ROI',t.roi+'%',d())}
+    ${kpi('CPA',BRL(t.cpa),d(),true)}${kpi('CTR',t.ctr+'%',d())}
+  </div>
+  <div class="grid col2" style="grid-template-columns:1.7fr 1fr;margin-bottom:14px">
+    <div class="card"><div class="between" style="margin-bottom:8px"><h3 style="font-size:15px">Evolução: gasto × receita</h3>
+      <div class="row" style="font-size:12px;gap:14px"><span class="row" style="gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:var(--brand)"></span>Receita</span><span class="row" style="gap:5px"><span style="width:10px;height:3px;border-radius:3px;background:var(--warn)"></span>Gasto</span></div></div>
+      ${areaChart(series)}</div>
+    <div class="card"><h3 style="font-size:15px;margin-bottom:6px">Verba por plataforma</h3>
+      <div class="row" style="justify-content:center">${donut(segs)}</div>
+      <div class="row" style="justify-content:center;gap:14px;font-size:12px;flex-wrap:wrap">${segs.map(s=>`<span class="row" style="gap:5px"><span style="width:9px;height:9px;border-radius:99px;background:${s.c}"></span>${s.n} ${BRL(s.v)}</span>`).join('')}</div></div>
+  </div>
+  <div class="grid col2" style="grid-template-columns:1fr 1fr;margin-bottom:14px">
+    <div class="card"><h3 style="font-size:15px;margin-bottom:10px">Mapa de calor — conversões por horário</h3>${heatmap()}</div>
+    <div class="grid" style="grid-template-columns:1fr 1fr">
+      <div class="card"><div class="lbl up">🏆 Melhor campanha</div><p style="margin:8px 0 0;font-weight:600">${best.name}</p><p class="muted" style="margin:2px 0 0;font-size:13px">ROAS ${best.roas}x</p></div>
+      <div class="card"><div class="lbl down">⚠ Pior campanha</div><p style="margin:8px 0 0;font-weight:600">${worst.name}</p><p class="muted" style="margin:2px 0 0;font-size:13px">ROAS ${worst.roas}x</p></div>
+      <div class="card"><div class="lbl" style="color:var(--warn)">🔥 Maior desperdício</div><p style="margin:8px 0 0;font-weight:600">${worst.name}</p><p class="muted" style="margin:2px 0 0;font-size:13px">CPA ${BRL(worst.cpa)}</p></div>
+      <div class="card"><div class="lbl" style="color:var(--brand)">💡 Oportunidade</div><p style="margin:8px 0 0;font-weight:600;font-size:13px">${recs[0].title}</p></div>
+    </div>
+  </div>`;
+}
+
+function viewClients(){
+  return head('Clientes','Modo agência: escolha um perfil para ver como gerenciá-lo — contas, metas, IA e o guia de gestão.')+`
+  <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+    ${clients.map(c=>{
+      const cc=campaigns.filter(x=>x.client===c.id);const t=totals(cc);
+      return `<div class="card clickable" onclick="go('client','${c.id}')">
+        <div class="row"><span class="avatar" style="background:${c.color}">${c.name[0]}</span>
+          <div style="min-width:0"><p style="font-weight:700;margin:0">${c.name}</p><p class="muted" style="margin:2px 0 0;font-size:12.5px">${c.seg}</p></div></div>
+        <div class="divider"></div>
+        <div class="row between" style="font-size:13px"><span class="muted">ROAS</span><b class="num">${t.roas}x</b></div>
+        <div class="row between" style="font-size:13px;margin-top:4px"><span class="muted">Investimento (30d)</span><b class="num">${BRL(t.spend)}</b></div>
+        <p class="link" style="margin:12px 0 0;font-size:13px">Ver como gerenciar →</p>
+      </div>`;}).join('')}
+  </div>`;
+}
+
+function viewClient(id){
+  const c=clients.find(x=>x.id===id);const cc=campaigns.filter(x=>x.client===id);const t=totals(cc);
+  const cns=connections.filter(x=>x.client===id);const gs=goals.filter(x=>x.client===id);
+  const cnOk=cns.length&&cns.every(x=>x.status==='active');
+  const done=guideDone[id]||{};
+  const applied=recs.filter(r=>r.status==='applied').length, open=recs.filter(r=>r.status==='open').length;
+  const guide=[
+    {id:'accounts',t:'Revisar contas conectadas',d:cnOk?`${cns.length} contas ativas e sincronizando.`:'Há conta(s) expiradas ou com erro — reautentique para não perder dados.',done:cnOk,to:'connections',cta:'Ver conexões'},
+    {id:'goals',t:'Definir metas do cliente',d:gs.length?`${gs.length} meta(s) com projeção de fim de mês.`:'Nenhuma meta definida ainda — comece por ROAS ou CPA-alvo.',done:gs.length>0,to:'goals',cta:'Definir metas'},
+    {id:'diag',t:'Ler o diagnóstico da IA',d:'Veja o que vai bem e o que queima verba neste perfil, em linguagem simples.',done:!!done.diag,to:'recs',cta:'Abrir diagnóstico'},
+    {id:'recs',t:'Aplicar recomendações',d:applied?`${applied} aplicada(s); ${open} em aberto.`:`${open} recomendação(ões) esperando ação.`,done:applied>0,to:'recs',cta:'Ver recomendações'},
+    {id:'rules',t:'Ativar automações com guardrails',d:done.rules?'Regras se→então protegendo o orçamento.':'Sem automações ativas — crie regras com preview (dry-run).',done:!!done.rules,to:'automations',cta:'Configurar'},
+    {id:'report',t:'Agendar relatório white-label',d:done.report?'Relatório pronto para compartilhar por link ou PDF.':'Nenhum relatório para este cliente ainda.',done:!!done.report,to:null,cta:'Gerar relatório'},
+  ];
+  const dc=guide.filter(s=>s.done).length;const score=Math.round(dc/guide.length*100);
+  const hl=score>=80?['up','Perfil saudável','var(--good)']:score>=50?['','Precisa de atenção','var(--warn)']:['down','Requer ação urgente','var(--bad)'];
+  return `<p class="link" onclick="go('clients')" style="display:inline-flex;gap:5px;margin-bottom:12px">← Voltar para clientes</p>
+  <div class="card between anim" style="margin-bottom:14px">
+    <div class="row"><span class="avatar" style="width:58px;height:58px;font-size:22px;background:${c.color}">${c.name[0]}</span>
+      <div><h1 style="font-size:23px">${c.name}</h1><p class="muted" style="margin:3px 0 0;font-size:13.5px">${c.seg} • cliente desde ${c.since}</p></div></div>
+    <div class="row" style="border:1px solid ${hl[2]}55;background:color-mix(in srgb,${hl[2]} 10%,transparent);padding:9px 16px;border-radius:14px;gap:12px">
+      <b style="font-size:24px;color:${hl[2]}" class="num">${score}%</b><div><div class="lbl">Saúde do perfil</div><b style="color:${hl[2]};font-size:13.5px">${hl[1]}</b></div></div>
+  </div>
+  <div class="grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+    ${[['Responsável',c.owner],['E-mail',c.email],['Telefone',c.phone],['Contas',cns.length+' conectadas']].map(([l,v])=>`<div class="card" style="padding:13px"><div class="lbl">${l}</div><p style="margin:5px 0 0;font-weight:600;font-size:13.5px;word-break:break-word">${v}</p></div>`).join('')}
+  </div>
+  <div class="lbl" style="margin-bottom:8px">Desempenho — últimos 30 dias</div>
+  <div class="kpis" style="margin-bottom:16px">
+    ${kpi('Investimento',BRL(t.spend))}${kpi('Receita',BRL(t.rev))}${kpi('ROAS',t.roas+'x')}${kpi('CPA',BRL(t.cpa))}${kpi('CTR',t.ctr+'%')}${kpi('Conversões',NUM(t.conv))}
+  </div>
+  <div class="grid col2" style="grid-template-columns:1.6fr 1fr">
+    <div>
+      <div class="between" style="margin-bottom:8px"><h3 style="font-size:16px">Como gerenciar este perfil</h3><span class="pill v">${dc}/${guide.length} concluídos</span></div>
+      <div class="grid" style="gap:8px">
+        ${guide.map((s,i)=>`<div class="card step" style="padding:14px">
+          <span class="stepnum">${s.done?`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg>`:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>`}</span>
+          <div style="flex:1;min-width:0"><p style="font-weight:650;margin:0"><span class="muted">${i+1}.</span> ${s.t}</p><p class="muted" style="margin:3px 0 0;font-size:13px">${s.d}</p></div>
+          <button class="btn sm" onclick="guideAct('${id}','${s.id}','${s.to||''}')">${s.cta} →</button>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="grid" style="gap:14px;align-content:start">
+      <div class="card"><h3 style="font-size:15px;margin-bottom:10px">Contas conectadas</h3>
+        ${cns.map(x=>`<div class="between" style="padding:8px 0;border-top:1px solid var(--border)"><div style="min-width:0"><p style="margin:0;font-size:13px;font-weight:600">${x.acc}</p><div class="row" style="gap:6px;margin-top:4px">${platPill(x.plat)}${statusPill(x.status)}</div></div></div>`).join('')}</div>
+      <div class="card"><h3 style="font-size:15px;margin-bottom:8px">Metas</h3>
+        ${gs.length?gs.map(g=>`<div style="padding:7px 0"><div class="between" style="font-size:13px"><b>${g.label}</b></div><p class="muted" style="margin:2px 0 0;font-size:12.5px">Atual ${g.metric==='roas'?g.cur+'x':BRL(g.cur)} • meta ${g.metric==='roas'?g.tgt+'x':BRL(g.tgt)}</p></div>`).join(''):'<p class="muted" style="font-size:13px">Sem metas definidas.</p>'}</div>
+      <div class="card" style="border-color:var(--brand);background:var(--brand-soft)"><h3 style="font-size:15px;margin-bottom:10px;color:var(--brand)">Ações rápidas</h3>
+        <div class="grid" style="gap:8px"><button class="btn p" onclick="go('recs')">Ver diagnóstico da IA</button><button class="btn" onclick="go('campaigns')">Gerenciar campanhas</button><button class="btn" onclick="toast('Relatório gerado (demo).')">Gerar relatório</button></div></div>
+    </div>
+  </div>`;
+}
+
+function viewCampaigns(){
+  return head('Campanhas','Tabela unificada das 3 plataformas. Pause, ative e acompanhe as métricas.')+`
+  <div class="card twrap" style="padding:6px 6px">
+    <table><thead><tr><th>Campanha</th><th>Plataforma</th><th>Status</th><th style="text-align:right">Gasto</th><th style="text-align:right">Receita</th><th style="text-align:right">ROAS</th><th style="text-align:right">CPA</th><th style="text-align:right">CTR</th><th></th></tr></thead>
+    <tbody>${campaigns.map(c=>`<tr>
+      <td><b>${c.name}</b></td><td>${platPill(c.plat)}</td><td>${statusPill(c.status)}</td>
+      <td style="text-align:right" class="num">${BRL(c.spend)}</td><td style="text-align:right" class="num">${BRL(c.rev)}</td>
+      <td style="text-align:right;font-weight:700" class="num">${c.roas}x</td><td style="text-align:right" class="num">${BRL(c.cpa)}</td><td style="text-align:right" class="num">${c.ctr}%</td>
+      <td style="text-align:right"><button class="btn sm" onclick="togglePause('${c.id}')">${c.status==='paused'?'▶ Ativar':'⏸ Pausar'}</button></td>
+    </tr>`).join('')}</tbody></table>
+  </div>`;
+}
+
+function viewRadar(){
+  return head('Radar de Tendências','A máquina de inteligência: o que está vendendo e o que está viralizando no mundo.')+`
+  <h3 style="font-size:16px;margin:0 0 10px">Produtos em alta</h3>
+  <div class="grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:22px">
+    ${products.map(p=>`<div class="card"><div class="between"><div><b>${p.name}</b><p class="muted" style="margin:2px 0 0;font-size:12.5px">${p.cat} • ${p.mkt} • ${p.country}</p></div><span class="avatar" style="width:44px;height:44px;background:var(--brand-soft);color:var(--brand);font-size:16px" class="num">${p.score}</span></div>
+      ${spark(Array.from({length:7},()=>ri(30,100)))}
+      <div class="row" style="gap:16px;font-size:12.5px;margin-top:4px"><span>Cresc. 7d <b class="up">+${p.g}%</b></span><span>${BRL(p.pmin)}–${BRL(p.pmax)}</span><span>Concorrência <b>${p.comp}</b></span></div>
+      <p style="margin:12px 0 0;font-size:13px;background:var(--surface2);padding:11px;border-radius:11px">🔥 ${p.insight}</p></div>`).join('')}
+  </div>
+  <h3 style="font-size:16px;margin:0 0 10px">Vídeos em alta no mundo</h3>
+  <div class="grid" style="grid-template-columns:repeat(2,1fr)">
+    ${videos.map(v=>`<div class="card"><div class="between"><span class="pill v">${v.net}</span><div class="row" style="gap:12px;font-size:12px" class="muted"><span>👁 ${CMP(v.views)}</span><span class="up">▲ +${v.g}% 24h</span></div></div>
+      <p style="margin:8px 0 0;font-weight:650">${v.t}</p><p class="muted" style="margin:2px 0 0;font-size:12px">${v.fmt}</p>
+      <p style="margin:8px 0 0;font-size:13px"><b class="muted">Gancho (3s):</b> ${v.hook}</p><p style="margin:4px 0 0;font-size:13px"><b class="muted">Por que funciona:</b> ${v.why}</p></div>`).join('')}
+  </div>`;
+}
+
+function viewRecs(){
+  const t=totals(campaigns);
+  return head('Recomendações IA','Diagnóstico automático + ações priorizadas por impacto, com aplicar em 1 clique.')+`
+  <div class="card anim" style="border-color:var(--brand);background:var(--brand-soft);margin-bottom:16px">
+    <div class="row" style="align-items:flex-start;gap:14px"><span class="avatar" style="width:42px;height:42px;background:linear-gradient(135deg,var(--brand),var(--brand2))">✨</span>
+    <div><h3 style="font-size:15px;color:var(--brand)">Diagnóstico do gestor virtual</h3>
+    <p style="margin:6px 0 0;font-size:13.5px">Nos últimos 30 dias você investiu <b>${BRL(t.spend)}</b> e gerou <b>${BRL(t.rev)}</b> — ROAS de <b>${t.roas}</b>. O remarketing sustenta o ROAS acima da média; a prospecção fria com CPA alto e criativos com fadiga queimam verba. Recomendo realocar verba para as vencedoras e trocar 2 criativos cansados nesta semana.</p></div></div>
+  </div>
+  <div class="grid" style="gap:10px">
+    ${recs.map(r=>`<div class="card between" style="align-items:flex-start">
+      <div style="min-width:0;flex:1"><div class="row" style="gap:8px;flex-wrap:wrap"><span style="color:var(--brand)">✨</span><b>${r.title}</b>
+        <span class="pill ${r.impact==='alto'?'b':'w'}">Impacto ${r.impact}</span>${platPill(r.plat)}${r.status==='applied'?'<span class="pill g">Aplicada</span>':''}</div>
+        <p class="muted" style="margin:8px 0 0;font-size:13px"><b style="color:var(--fg)">Por quê:</b> ${r.why}</p>
+        <p class="muted" style="margin:3px 0 0;font-size:13px"><b class="up">${r.gain}</b></p></div>
+      <div class="row" style="gap:8px">${r.status==='applied'
+        ?`<button class="btn sm" onclick="undoRec('${r.id}')">Desfazer</button>`
+        :`<button class="btn p sm" onclick="applyRec('${r.id}')">✓ Aplicar</button>`}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ── conexões e metas (destinos do guia) ──
+function viewConnections(){
+  return head('Conexões','Contas de anúncios conectadas via OAuth. Modo agência com múltiplos clientes.')+`
+  <div class="grid" style="grid-template-columns:repeat(2,1fr)">
+    ${connections.map(x=>`<div class="card between"><div><p style="margin:0;font-weight:600">${x.acc}</p><div class="row" style="gap:6px;margin-top:6px">${platPill(x.plat)}${statusPill(x.status)}<span class="muted" style="font-size:12px">Última: ${x.sync}</span></div></div>
+      <button class="btn sm" onclick="syncConn('${x.id}')">↻ Sincronizar</button></div>`).join('')}
+  </div>`;
+}
+function viewGoals(){
+  return head('Metas & Previsões','Metas por cliente com barra de progresso e projeção de fim de mês.')+`
+  <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+    ${goals.map(g=>{const pr=g.metric==='cpa'?Math.min(100,g.tgt/g.cur*100):Math.min(100,g.cur/g.tgt*100);
+      const ok=g.metric==='cpa'?g.proj<=g.tgt:g.proj>=g.tgt;const f=v=>g.metric==='budget'||g.metric==='cpa'?BRL(v):v+'x';
+      return `<div class="card"><b>${g.label}</b>
+      <div class="between" style="margin-top:12px;align-items:flex-end"><div><div class="lbl">Atual</div><div style="font-size:22px;font-weight:800" class="num">${f(g.cur)}</div></div><div style="text-align:right"><div class="lbl">Meta</div><b class="num">${f(g.tgt)}</b></div></div>
+      <div class="bar" style="margin-top:12px"><i style="width:${pr}%"></i></div>
+      <p style="margin:12px 0 0;font-size:12.5px;color:${ok?'var(--good)':'var(--warn)'}">▲ Projeção fim do mês: <b>${f(g.proj)}</b> — ${ok?'no ritmo da meta':'abaixo do necessário'}</p></div>`;}).join('')}
+  </div>`;
+}
+
+// ── automações ──
+function viewAutomations(){
+  return head('Automações','Regras se → então rodando em background, com preview (dry-run) e guardrails de orçamento.')+`
+  <div class="card between anim" style="border-color:color-mix(in srgb,var(--good) 40%,var(--border));background:color-mix(in srgb,var(--good) 7%,transparent);margin-bottom:14px">
+    <div class="row" style="gap:10px"><span style="color:var(--good);font-size:18px">🛡️</span><p class="muted" style="margin:0;font-size:13px">A IA nunca gasta sozinha. Toda regra tem piso, teto e variação máxima por disparo — e você pode simular antes de ativar.</p></div>
+  </div>
+  <div class="grid" style="gap:10px">
+    ${rules.map(r=>`<div class="card">
+      <div class="between"><div><div class="row" style="gap:8px"><span style="color:var(--brand)">⚙️</span><b>${r.name}</b><span class="pill ${r.on?'g':'m'}">${r.on?'Ativa':'Pausada'}</span></div>
+        <p style="margin:8px 0 0;font-size:13.5px"><b class="muted">SE</b> ${r.cond} &nbsp;<b class="muted">ENTÃO</b> ${r.act}</p>
+        <p class="muted" style="margin:4px 0 0;font-size:12px">Guardrails: piso ${BRL(r.floor)} • teto ${BRL(r.cap)} • variação máx. ${r.maxpct}% • disparos: ${r.fires}${r.last?' • último: '+r.last:''}</p></div>
+      <div class="row" style="gap:8px;align-items:flex-start">
+        <button class="btn sm" onclick="toggleRule('${r.id}')">${r.on?'Pausar':'Ativar'}</button>
+        <button class="btn sm" onclick="previewRule('${r.id}')">👁 Preview</button>
+        <button class="btn p sm" onclick="runRule('${r.id}')">▶ Rodar</button></div>
+      </div>
+      <div id="pv-${r.id}"></div>
+    </div>`).join('')}
+  </div>`;
+}
+function toggleRule(id){const r=rules.find(x=>x.id===id);r.on=!r.on;toast(r.on?'Regra ativada.':'Regra pausada.');go('automations');}
+function runRule(id){const r=rules.find(x=>x.id===id);r.fires++;r.last='agora mesmo';toast(`Regra "${r.name}" disparou em 2 conjuntos.`);go('automations');}
+function previewRule(id){
+  const box=document.getElementById('pv-'+id);
+  if(box.innerHTML){box.innerHTML='';return;}
+  const rows=[
+    {n:'Prospecção Fria 3',c:'Pausar (CPA R$ 92 > R$ 60)',ok:true},
+    {n:'Escala Vencedora 3',c:'Verba R$ 250 → R$ 300 (+20%)',ok:true},
+    {n:'Catálogo Dinâmico',c:'Verba +40% bloqueada pelo teto de variação (20%)',ok:false},
+  ];
+  box.innerHTML=`<div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)"><div class="lbl" style="margin-bottom:8px">Preview (dry-run) — sem alterar nada</div>
+    ${rows.map(x=>`<div class="between" style="padding:8px 11px;border-radius:10px;background:${x.ok?'var(--surface2)':'color-mix(in srgb,var(--bad) 9%,transparent)'};margin-bottom:6px">
+      <div><b style="font-size:13px">${x.n}</b><p class="muted" style="margin:1px 0 0;font-size:12.5px">${x.c}</p></div>${x.ok?'<span class="pill g">OK</span>':'<span class="pill b">Bloqueado</span>'}</div>`).join('')}</div>`;
+}
+
+// ── planejador ──
+function viewPlanner(){
+  return head('Planejador de Postagem','Melhores janelas por rede + análise honesta do seu vídeo antes de publicar.')+`
+  <div class="grid col2" style="grid-template-columns:1fr 1fr">
+    <div class="card"><h3 style="font-size:15px;margin-bottom:12px">📅 Melhores janelas de postagem</h3>
+      ${windows.map(w=>`<div style="padding:10px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px">
+        <div class="between"><b style="font-size:13.5px">${w.net}</b><div class="row" style="gap:6px">${w.hours.map(h=>`<span class="pill v">🕐 ${h}</span>`).join('')}</div></div>
+        <p class="muted" style="margin:6px 0 0;font-size:12px">${w.note}</p></div>`).join('')}
+      <p class="muted" style="margin:10px 0 0;font-size:12px">Dica: publique orgânico nessas janelas e concentre os lances pagos nos horários que mais convertem no seu mapa de calor.</p></div>
+    <div class="card"><h3 style="font-size:15px;margin-bottom:10px">✨ Analisar meu vídeo antes de postar</h3>
+      <label class="lbl" for="vdesc">Descreva o vídeo (tema, gancho, formato)</label>
+      <textarea id="vdesc" rows="4" placeholder="Ex.: vídeo mostrando antes/depois de um produto de skincare, começa com a pessoa reclamando da pele..." style="width:100%;margin-top:6px;padding:10px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);color:var(--fg);font-family:inherit;font-size:13.5px;resize:vertical"></textarea>
+      <button class="btn p" style="width:100%;margin-top:10px" onclick="analyzeVideo()">Analisar com IA</button>
+      <div id="vresult"></div></div>
+  </div>`;
+}
+function analyzeVideo(){
+  const desc=(document.getElementById('vdesc').value||'').trim();
+  if(desc.length<8){toast('Descreva o vídeo com um pouco mais de detalhe.');return;}
+  const strong=desc.length>40;const score=strong?ri(68,86):ri(42,60);
+  const verdict=strong
+    ?'Boa base: a ideia tem gancho, mas os 3 primeiros segundos precisam entregar o conflito antes do contexto. Corte a introdução.'
+    :'Precisa de mais substância. Sem um gancho claro nos 3s iniciais, a retenção cai e o CPM sobe. Reescreva a abertura.';
+  const hooks=['"Ninguém te conta isso sobre [tema]..."','"Eu testei por 7 dias — o resultado me surpreendeu."','"Se você faz isso, está perdendo dinheiro todo dia."'];
+  const plans=[
+    {net:'TikTok',title:'O erro de tráfego que te custa caro (testei)',tags:'#trafegopago #ads',time:'19h–22h',fmt:'9:16, legenda queimada, corte a cada 2s',tip:'Suba como Spark Ad o criativo de maior retenção orgânica.'},
+    {net:'Reels',title:'3 erros que queimam sua verba de anúncio',tags:'#gestordetrafego #meta',time:'12h e 20h',fmt:'9:16, texto grande, CTA no fim',tip:'Use Advantage+ com público amplo; deixe o algoritmo achar o comprador.'},
+    {net:'YouTube Shorts',title:'Como dobrei o ROAS em 14 dias',tags:'#shorts #googleads',time:'18h–21h',fmt:'Vertical, 45s, thumbnail forte',tip:'Reaproveite como discovery ad segmentando por interesse.'},
+  ];
+  document.getElementById('vresult').innerHTML=`<div class="anim" style="margin-top:14px">
+    <div style="padding:12px;border-radius:12px;background:var(--surface2)"><div class="between"><b style="font-size:13.5px">Veredito honesto</b><span class="pill ${score>=65?'g':'w'}">Nota ${score}/100</span></div><p class="muted" style="margin:6px 0 0;font-size:13px">${verdict}</p></div>
+    <p class="lbl" style="margin:14px 0 6px">3 ganchos sugeridos</p>${hooks.map(h=>`<p style="margin:3px 0;font-size:13px" class="muted">• ${h}</p>`).join('')}
+    <p class="lbl" style="margin:14px 0 6px">Plano por rede</p>
+    ${plans.map(p=>`<div style="padding:11px;border:1px solid var(--border);border-radius:11px;margin-bottom:7px">
+      <b style="font-size:13px">${p.net} — ${p.title}</b>
+      <p class="muted" style="margin:4px 0 0;font-size:12px">Hashtags: ${p.tags} • Horário: ${p.time}</p>
+      <p class="muted" style="margin:1px 0 0;font-size:12px">Formato: ${p.fmt}</p>
+      <p style="margin:4px 0 0;font-size:12px;color:var(--brand)">💰 Tráfego pago: ${p.tip}</p></div>`).join('')}
+  </div>`;
+}
+
+// ── roteamento ──
+const NAV=[
+  ['dashboard','Dashboard','M3 13h8V3H3zM13 21h8V3h-8zM3 21h8v-6H3z'],
+  ['clients','Clientes','M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75'],
+  ['campaigns','Campanhas','M3 11l19-9-9 19-2-8-8-2z'],
+  ['recs','Recomendações IA','M12 2l2.4 7.4H22l-6 4.4 2.3 7.2L12 16.6 5.7 21l2.3-7.2-6-4.4h7.6z'],
+  ['automations','Automações','M6 3v12 M18 9v12 M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M18 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M6 15a9 9 0 0 1 9-9'],
+  ['radar','Radar de Tendências','M12 12m-10 0a10 10 0 1 0 20 0 10 10 0 1 0-20 0 M12 12m-6 0a6 6 0 1 0 12 0 6 6 0 1 0-12 0 M12 12l4-4'],
+  ['planner','Planejador de Postagem','M8 2v4 M16 2v4 M3 8h18 M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M12 13v4 M10 15h4'],
+];
+let current='dashboard';
+function renderNav(){
+  document.getElementById('nav').innerHTML=NAV.map(([id,label,path])=>
+    `<button class="${current===id||(current==='client'&&id==='clients')||(['connections','goals'].includes(current)&&id==='clients')?'on':''}" onclick="go('${id}')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg>${label}</button>`).join('');
+}
+const VIEWS={dashboard:viewDashboard,clients:viewClients,campaigns:viewCampaigns,radar:viewRadar,recs:viewRecs,connections:viewConnections,goals:viewGoals,automations:viewAutomations,planner:viewPlanner};
+let param=null;
+function go(v,p){current=v;param=p||null;renderNav();
+  const view=document.getElementById('view');
+  view.innerHTML = v==='client'?viewClient(p):(VIEWS[v]?VIEWS[v]():viewDashboard());
+  view.classList.remove('anim');void view.offsetWidth;view.classList.add('anim');
+  window.scrollTo(0,0);
+  if(window.innerWidth<=880) closeMenu();
+}
+
+// ── ações ──
+function toggleTheme(){
+  const r=document.documentElement;
+  const cur=r.getAttribute('data-theme')|| (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  const next=cur==='dark'?'light':'dark';r.setAttribute('data-theme',next);setThemeIcon(next);
+}
+function setThemeIcon(t){document.getElementById('themeBtn').innerHTML= t==='dark'
+  ?'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>'
+  :'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2400);}
+function togglePause(id){const c=campaigns.find(x=>x.id===id);c.status=c.status==='paused'?'active':'paused';toast(c.status==='paused'?'Campanha pausada.':'Campanha ativada.');go('campaigns');}
+function applyRec(id){recs.find(r=>r.id===id).status='applied';toast('Recomendação aplicada. Você pode desfazer.');go('recs');}
+function undoRec(id){recs.find(r=>r.id===id).status='open';toast('Ação desfeita.');go('recs');}
+function syncConn(id){const c=connections.find(x=>x.id===id);c.status='active';c.sync='agora mesmo';toast('Conta sincronizada.');go('connections');}
+function guideAct(cid,step,to){guideDone[cid]=guideDone[cid]||{};guideDone[cid][step]=true;
+  if(to&&VIEWS[to]) go(to); else {toast('Passo concluído.');go('client',cid);}}
+function toggleMenu(){document.getElementById('side').classList.toggle('open');document.getElementById('scrim').classList.toggle('on');}
+function closeMenu(){document.getElementById('side').classList.remove('open');document.getElementById('scrim').classList.remove('on');}
+
+// init
+setThemeIcon(document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+renderNav();go('dashboard');
+</script>
+
+</body>
+</html>
