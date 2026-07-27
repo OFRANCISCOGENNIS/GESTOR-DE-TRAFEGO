@@ -7,6 +7,9 @@
 <body>
 <title>TrafegoAI — Gestor de tráfego pago com IA</title>
 <meta name="description" content="Google, Meta e TikTok Ads em um só painel, otimizados por IA. Demonstração interativa.">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
 <style>
   :root{
@@ -135,6 +138,9 @@
   .anim{animation:fade .3s ease}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
+  @media(max-width:1150px){
+    .col2{grid-template-columns:1fr!important}
+  }
   @media(max-width:880px){
     .app{grid-template-columns:1fr}
     .side{position:fixed;z-index:50;width:250px;transform:translateX(-100%);transition:.2s;box-shadow:var(--shadow)}
