@@ -425,13 +425,53 @@ export async function mockRequest(method: string, path: string, body?: any): Pro
     if (!profile) throw new Error("Cliente não encontrado");
     return profile;
   }
-  if (route === "/connections") return d.connections;
-  if (route.startsWith("/connections/") && route.endsWith("/sync") && method === "POST") {
+  if (route === "/connections") {
+    // acrescenta o nome do cliente, como faz a API real
+    return d.connections.map((c) => ({
+      ...c,
+      clientName: d.clients.find((cl) => connectionsOfClient(cl, [c]).length)?.name,
+    }));
+  }
+  // Sem backend não há credenciais de plataforma nenhuma: dizemos isso na cara.
+  if (route === "/connections/status") {
+    const semBackend =
+      "Conectar contas de verdade exige a API rodando com as credenciais da plataforma. " +
+      "Veja INTEGRACAO_APIS.md.";
+    return {
+      meta: { configured: false, comoConfigurar: semBackend },
+      google: { configured: false, comoConfigurar: semBackend },
+      tiktok: { configured: false, comoConfigurar: semBackend },
+    };
+  }
+  if (route.match(/^\/connections\/[^/]+\/authorize$/) && method === "POST") {
+    throw new Error(
+      "Sem a API configurada não dá para autorizar uma conta real. Suba o backend com as credenciais da plataforma.",
+    );
+  }
+  if (route.match(/^\/connections\/[^/]+\/sync$/) && method === "POST") {
     const id = route.split("/")[2];
     const cn = d.connections.find((c) => c.id === id);
-    if (cn) { cn.lastSync = "agora mesmo"; cn.status = "active"; }
-    logAudit("Sincronizou conta", cn?.accountName || id);
-    return cn;
+    if (!cn) throw new Error("Conexão não encontrada");
+    cn.lastSync = "agora mesmo";
+    cn.status = "active";
+    logAudit("Sincronizou conta", cn.accountName);
+    const camps = d.campaigns.filter(() => true).slice(0, 4);
+    return {
+      connectionId: cn.id,
+      accountName: cn.accountName,
+      days: body?.days ?? 30,
+      campaigns: camps.length,
+      rows: camps.length * 30,
+      spend: round(sumMetrics(camps.map((c) => sumMetrics(d.series[c.id].slice(-30)))).spend, 2),
+      revenue: round(sumMetrics(camps.map((c) => sumMetrics(d.series[c.id].slice(-30)))).revenue, 2),
+    };
+  }
+  if (route.match(/^\/connections\/[^/]+\/disconnect$/) && method === "POST") {
+    const id = route.split("/")[2];
+    const cn = d.connections.find((c) => c.id === id);
+    if (cn) cn.status = "expired";
+    logAudit("Desconectou conta", cn?.accountName || id);
+    return { ok: true };
   }
 
   // campaigns

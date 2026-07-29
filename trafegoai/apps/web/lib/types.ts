@@ -185,6 +185,27 @@ export interface Connection {
   accountName: string;
   status: "active" | "expired" | "error";
   lastSync: string;
+  clientId?: string;
+  clientName?: string;
+  externalAccountId?: string | null;
+}
+
+/** Diz se a plataforma tem credenciais configuradas na API. */
+export interface PlatformStatus {
+  configured: boolean;
+  comoConfigurar: string | null;
+}
+export type ConnectionsStatus = Record<Platform, PlatformStatus>;
+
+/** Resultado de uma sincronização de métricas. */
+export interface SyncResult {
+  connectionId: string;
+  accountName: string;
+  days: number;
+  campaigns: number;
+  rows: number;
+  spend: number;
+  revenue: number;
 }
 
 export interface Product {
