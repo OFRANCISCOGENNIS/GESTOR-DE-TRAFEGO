@@ -63,13 +63,18 @@ model Connection {
   id           String   @id @default(cuid())
   platform     Platform
   accountName  String
+  // Identificador da conta na plataforma (ex.: act_1234567890 na Meta)
+  externalAccountId String?
   status       String   @default("active") // active | expired | error
   // Tokens OAuth criptografados em repouso (AES-256-GCM). Nunca em texto puro.
   accessToken  String? // formato: iv:authTag:ciphertext (base64)
   refreshToken String?
+  tokenExpiresAt DateTime?
   lastSync     DateTime @default(now())
   clientId     String
   client       Client   @relation(fields: [clientId], references: [id])
+
+  @@index([platform, externalAccountId])
 }
 
 model Campaign {
@@ -83,6 +88,9 @@ model Campaign {
   client      Client   @relation(fields: [clientId], references: [id])
   adSets      AdSet[]
   metrics     MetricDaily[]
+
+  // Uma campanha da plataforma aparece uma única vez por plataforma.
+  @@unique([externalId, platform])
 }
 
 model AdSet {
@@ -125,6 +133,8 @@ model MetricDaily {
   ad          Ad?         @relation(fields: [adId], references: [id])
 
   @@index([date, level])
+  // Permite reprocessar a sincronização sem duplicar o mesmo dia.
+  @@unique([campaignId, date, level])
 }
 
 model Rule {

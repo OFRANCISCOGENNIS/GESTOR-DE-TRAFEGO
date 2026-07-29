@@ -48,12 +48,8 @@ export class MiscController {
     };
   }
 
-  @Get("connections") connections() { return this.prisma.connection.findMany(); }
-  @Post("connections/:id/sync")
-  sync(@Param("id") id: string) {
-    // Sincronização manual. Enfileira job de sync no worker (BullMQ) na versão real.
-    return this.prisma.connection.update({ where: { id }, data: { status: "active", lastSync: new Date() } });
-  }
+  // As rotas de conexão vivem em connections/connections.controller.ts,
+  // que implementa o OAuth real e a sincronização das métricas.
 
   @Get("goals") goals() { return this.prisma.goal.findMany(); }
   @Get("audit") audit() { return this.prisma.auditLog.findMany({ orderBy: { at: "desc" }, take: 50 }); }

@@ -47,31 +47,68 @@ Faça na ordem. Guarde cada credencial num lugar seguro (nunca no repositório).
 
 ## Etapa 2 — O que já está pronto no código
 
-O backend em `trafegoai/apps/api` já foi construído esperando essas credenciais:
+### Meta: implementada de ponta a ponta ✅
 
-- `src/connectors/connectors.ts` — conectores de Google/Meta/TikTok com a camada
-  de normalização (`MetricDaily`), com os pontos de integração marcados.
-- `src/common/crypto.util.ts` — criptografia AES-256-GCM para guardar os tokens
-  OAuth em repouso (com testes de ida e volta).
+O conector da Meta **já está escrito e testado**. Falta apenas você preencher
+`META_APP_ID` e `META_APP_SECRET` (etapa 1a) para ele começar a funcionar.
+
+| Arquivo | O que faz |
+|---|---|
+| `src/connectors/meta.connector.ts` | Cliente real da Graph API: monta a URL de autorização, troca o código por token, converte para token de 60 dias, lista as contas de anúncios e lê as métricas diárias com paginação |
+| `src/connectors/meta.normalize.ts` | Converte a resposta da Meta para o schema comum `MetricDaily`. Resolve o detalhe chato dos arrays `actions`/`action_values`, escolhendo o evento de compra **sem contar a mesma venda duas vezes** |
+| `src/connectors/meta.normalize.spec.ts` | 8 testes cobrindo campos ausentes, eventos duplicados, valores em texto e arredondamento |
+| `src/connections/connections.controller.ts` | Rotas `POST /connections/meta/authorize`, `GET /connections/meta/callback`, `POST /connections/:id/sync` e `GET /connections/status` |
+| `src/connections/meta.sync.service.ts` | Grava as métricas no banco com upsert por campanha e dia (pode rodar várias vezes sem duplicar); marca a conexão como expirada quando o token cai |
+| `src/worker.main.ts` | Sincroniza sozinho de hora em hora, puxando os últimos 7 dias (a Meta reprocessa atribuição de dias anteriores) |
+
+Segurança já resolvida: os tokens são gravados **criptografados com AES-256-GCM**
+(`src/common/crypto.util.ts`), o `state` do OAuth protege contra CSRF, e toda
+conexão e sincronização gera registro em `AuditLog`.
+
+### Google e TikTok
+
+Os stubs seguem em `src/connectors/connectors.ts`, no mesmo formato do conector
+da Meta — que agora serve de modelo pronto para copiar.
+
 - `prisma/schema.prisma` — tabelas de conexões, campanhas e métricas diárias.
-- `src/worker.main.ts` — sincronização agendada (BullMQ) de hora em hora.
 - `.env.example` — lista exata das variáveis a preencher.
 
-## Etapa 3 — Ordem sugerida de implementação
+## Como ligar a Meta quando você tiver as chaves
 
-1. **Meta primeiro** (funciona em modo desenvolvimento sem análise):
-   preencher `META_APP_ID` e `META_APP_SECRET`, implementar o fluxo OAuth em
-   `connections` e a leitura de `/{ad_account}/insights` no conector.
-2. **Google Ads** assim que o token de desenvolvedor for aprovado.
-3. **TikTok** quando o app for aprovado.
-4. Subir a API num serviço com plano gratuito (guias prontos:
-   `DEPLOY.md`, `DEPLOY_RAILWAY.md`, `render.yaml`).
-5. Apontar o frontend para a API (`NEXT_PUBLIC_API_URL`).
+```bash
+cd trafegoai/apps/api
+cp .env.example .env         # preencha META_APP_ID e META_APP_SECRET
+npx prisma migrate dev       # cria as tabelas
+npm run start:dev            # sobe a API
+```
+
+No app da Meta, cadastre a URI de redirecionamento **exatamente** igual à do
+`.env` (produto "Login do Facebook" → Configurações → URIs de redirecionamento
+válidas), por exemplo `http://localhost:3333/connections/meta/callback`.
+
+Para conferir se está configurado: `GET /connections/status` responde
+`{"meta":{"configured":true}}` quando as chaves estão no lugar.
+
+Depois é só chamar `POST /connections/meta/authorize` com o `clientId`, abrir a
+`authUrl` devolvida, autorizar, e rodar `POST /connections/:id/sync`.
+
+## Etapa 3 — O que falta
+
+1. ~~Escrever o conector da Meta~~ — **feito** (código, testes e sincronização).
+2. **Você criar o app na Meta** (etapa 1a) e me passar `META_APP_ID` e
+   `META_APP_SECRET`. Leva cerca de 15 minutos.
+3. Subir a API num serviço com plano gratuito (guias prontos:
+   `DEPLOY.md`, `DEPLOY_RAILWAY.md`, `render.yaml`), porque a chave secreta não
+   pode ficar num site estático.
+4. Apontar o frontend para a API (`NEXT_PUBLIC_API_URL`).
+5. **Google Ads** quando o token de desenvolvedor for aprovado, e **TikTok**
+   quando o app passar pela análise — ambos seguindo o modelo do conector da Meta.
 
 ## Resumo honesto
 
-- **Custo das APIs: zero.** Custo possível de servidor: zero a poucos dólares/mês.
-- **O que trava hoje:** as credenciais das etapas 1a–1c — só você pode criá-las.
-- **Quando você tiver o ID e a chave do app da Meta (etapa 1a), me avise:**
-  esse é o primeiro conector que dá para ligar de verdade, e o código já está
-  esperando por ele.
+- **Custo das APIs: zero.** Custo de servidor: zero a poucos dólares por mês.
+- **O que já funciona:** todo o código da Meta, com 8 testes cobrindo a
+  conversão dos dados. Ele não foi testado contra a API real ainda, porque isso
+  exige credenciais válidas.
+- **O que trava hoje:** as credenciais das etapas 1a a 1c. Só você pode criá-las,
+  porque exigem seu login e a aceitação dos termos de cada plataforma.
