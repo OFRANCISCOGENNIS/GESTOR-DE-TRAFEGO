@@ -131,9 +131,37 @@ export class MetaConnector {
   }
 
   private async getJson(url: string): Promise<any> {
-    const res = await fetch(url);
-    const json = await res.json().catch(() => null);
-    if (!res.ok || (json && json.error)) {
+    let res: Response;
+    try {
+      res = await fetch(url);
+    } catch (e) {
+      // Não chegou a falar com a Meta: sem internet, DNS, firewall ou proxy.
+      const detail = (e as Error)?.message || 'motivo desconhecido';
+      this.logger.warn(`Não foi possível alcançar a Meta: ${detail}`);
+      throw new MetaApiError(
+        `Não foi possível alcançar a API da Meta (${detail}). Verifique a conexão ou se um firewall/proxy bloqueia graph.facebook.com.`,
+        undefined, undefined, true,
+      );
+    }
+
+    const text = await res.text();
+    let json: any = null;
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {
+      /* resposta não era JSON — tratado abaixo */
+    }
+
+    // Resposta sem JSON em um erro costuma ser página de bloqueio de proxy.
+    if (!json && !res.ok) {
+      this.logger.warn(`Resposta não-JSON da Meta (HTTP ${res.status})`);
+      throw new MetaApiError(
+        `A Meta respondeu HTTP ${res.status} sem conteúdo esperado. Isso normalmente indica um proxy ou firewall interceptando a chamada, não um problema das suas credenciais.`,
+        undefined, undefined, true,
+      );
+    }
+
+    if (!res.ok || json?.error) {
       const msg = json?.error?.message || `HTTP ${res.status}`;
       const code = json?.error?.code;
       this.logger.warn(`Meta API respondeu com erro${code ? ` (código ${code})` : ''}: ${msg}`);
@@ -144,12 +172,24 @@ export class MetaConnector {
 }
 
 export class MetaApiError extends Error {
-  constructor(message: string, readonly code?: number, readonly type?: string) {
+  constructor(
+    message: string,
+    readonly code?: number,
+    readonly type?: string,
+    /** true quando a chamada nem chegou à Meta (rede, proxy, firewall). */
+    readonly isNetwork = false,
+  ) {
     super(message);
     this.name = 'MetaApiError';
   }
+
   /** Token expirado ou revogado: precisa reconectar a conta. */
   get needsReauth(): boolean {
-    return this.code === 190 || this.type === 'OAuthException';
+    return !this.isNetwork && (this.code === 190 || this.type === 'OAuthException');
+  }
+
+  /** Limite de chamadas atingido: vale tentar de novo mais tarde. */
+  get isRateLimit(): boolean {
+    return this.code === 4 || this.code === 17 || this.code === 613;
   }
 }

@@ -73,6 +73,34 @@ da Meta — que agora serve de modelo pronto para copiar.
 - `prisma/schema.prisma` — tabelas de conexões, campanhas e métricas diárias.
 - `.env.example` — lista exata das variáveis a preencher.
 
+## Teste rápido das credenciais (sem servidor nem banco)
+
+Assim que tiver o ID e a chave do app, dá para provar que funciona em um minuto,
+sem subir nada:
+
+```bash
+cd trafegoai/apps/api
+npm install
+cp .env.example .env          # preencha META_APP_ID e META_APP_SECRET
+npm run meta:doctor
+```
+
+O comando confere as credenciais e imprime a URL de autorização. Para ver dados
+reais, pegue um token em
+[developers.facebook.com/tools/explorer](https://developers.facebook.com/tools/explorer)
+(escolha o seu app e a permissão `ads_read`) e rode:
+
+```bash
+npm run meta:doctor -- --token=SEU_TOKEN
+```
+
+Ele lista suas contas de anúncios e mostra investimento, receita, ROAS e
+conversões dos últimos 7 dias, já convertidos para o formato do painel. Opções:
+`--days=30` e `--conta=act_123456`.
+
+Se der erro, a mensagem diz qual é o caso: token expirado, falta de permissão,
+limite de chamadas ou bloqueio de rede até `graph.facebook.com`.
+
 ## Como ligar a Meta quando você tiver as chaves
 
 ```bash
@@ -107,8 +135,12 @@ Depois é só chamar `POST /connections/meta/authorize` com o `clientId`, abrir 
 ## Resumo honesto
 
 - **Custo das APIs: zero.** Custo de servidor: zero a poucos dólares por mês.
-- **O que já funciona:** todo o código da Meta, com 8 testes cobrindo a
-  conversão dos dados. Ele não foi testado contra a API real ainda, porque isso
-  exige credenciais válidas.
+- **O que já funciona:** todo o código da Meta, com 14 testes cobrindo a
+  conversão dos dados e a classificação de erros, mais o comando
+  `npm run meta:doctor` para você validar as credenciais em um minuto.
+- **O que não pude verificar:** a chamada real à `graph.facebook.com`. O ambiente
+  onde o código foi escrito bloqueia esse domínio por política de rede, então o
+  caminho de rede só será confirmado quando você rodar o `meta:doctor` com um
+  token válido. A lógica de conversão e o tratamento de erro estão testados.
 - **O que trava hoje:** as credenciais das etapas 1a a 1c. Só você pode criá-las,
   porque exigem seu login e a aceitação dos termos de cada plataforma.
