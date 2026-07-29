@@ -1,7 +1,7 @@
 // Service worker do TrafegoAI.
 // Estratégia "rede primeiro": sempre busca a versão mais nova; se estiver
 // offline, entrega a última versão guardada. Evita servir tela desatualizada.
-const CACHE = 'trafegoai-v5';
+const CACHE = 'trafegoai-v6';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {
