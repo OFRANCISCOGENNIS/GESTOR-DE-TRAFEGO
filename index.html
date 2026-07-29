@@ -6,10 +6,10 @@
 </head>
 <body>
 <title>TrafegoAI — Gestor de tráfego pago com IA</title>
-<meta name="description" content="Google, Meta e TikTok Ads em um só painel, otimizados por IA. Demonstração interativa.">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<meta name="description" content="Google, Meta e TikTok Ads em um só painel, otimizados por IA.">
+<meta name="theme-color" content="#6d4aff">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%236d4aff'/%3E%3Cpath d='M14 42l12-12 8 8 16-16' stroke='white' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 
 <style>
   :root{
@@ -53,10 +53,11 @@
   h1,h2,h3{margin:0;letter-spacing:-.02em;font-weight:750}
   a{color:inherit;text-decoration:none}
   button{font-family:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit}
   :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:8px}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-  /* ── shell (flexbox — à prova de estouro) ── */
+  /* ── shell ── */
   .app{display:flex;min-height:100vh;width:100%}
   .side{
     flex:0 0 250px;align-self:flex-start;position:sticky;top:0;height:100vh;overflow-y:auto;
@@ -74,14 +75,13 @@
   }
   .nav button:hover{background:var(--surface2);color:var(--fg)}
   .nav button.on{background:var(--brand);color:#fff}
-  .nav button.on svg{color:#fff}
   .nav svg{width:18px;height:18px;flex:0 0 auto}
   .side .foot{margin-top:auto;font-size:11px;color:var(--muted);padding:8px;line-height:1.5}
 
   .main{flex:1 1 0;min-width:0;display:flex;flex-direction:column}
   .top{
-    position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;
-    padding:12px 24px;background:color-mix(in srgb,var(--surface) 82%,transparent);
+    position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 24px;background:color-mix(in srgb,var(--surface) 86%,transparent);
     backdrop-filter:blur(10px);border-bottom:1px solid var(--border)
   }
   .content{padding:22px 24px 60px;max-width:1440px;width:100%;min-width:0}
@@ -98,16 +98,18 @@
   .pill.b{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
   .pill.m{background:var(--surface2);color:var(--muted)}
   .pill.v{background:var(--brand-soft);color:var(--brand)}
-  .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:11px;border:1px solid var(--border);
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 14px;border-radius:11px;border:1px solid var(--border);
     background:var(--surface2);color:var(--fg);font-size:13.5px;font-weight:600;transition:.15s}
   .btn:hover{border-color:var(--brand)}
   .btn.p{background:var(--brand);border-color:var(--brand);color:#fff}
   .btn.p:hover{filter:brightness(1.07)}
   .btn.sm{padding:6px 10px;font-size:12.5px;border-radius:9px}
-  .iconbtn{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--fg)}
+  .iconbtn{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--fg);position:relative}
   .iconbtn:hover{border-color:var(--brand)}
   .up{color:var(--good)} .down{color:var(--bad)}
   .lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .inp{width:100%;padding:9px 11px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);color:var(--fg);font-size:13.5px}
+  .inp:focus{outline:2px solid var(--brand);outline-offset:1px}
 
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
   .kpi{min-width:0}
@@ -115,12 +117,13 @@
   .kpi .d{font-size:11.5px;font-weight:600;margin-top:4px;display:flex;align-items:center;gap:3px}
 
   table{width:100%;border-collapse:collapse;font-size:13.5px}
-  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;padding:10px 10px}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;padding:10px}
+  th button{background:none;border:0;color:inherit;font:inherit;padding:0;display:inline-flex;gap:4px}
+  th button:hover{color:var(--fg)}
   td{padding:11px 10px;border-top:1px solid var(--border)}
   tbody tr:hover{background:var(--surface2)}
   .twrap{overflow-x:auto}
 
-  .demo-tag{font-size:11px}
   .row{display:flex;align-items:center;gap:10px}
   .between{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
   .muted{color:var(--muted)}
@@ -129,31 +132,67 @@
   .bar{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden}
   .bar>i{display:block;height:100%;background:var(--brand);border-radius:99px}
   .step{display:flex;gap:12px;align-items:flex-start}
-  .stepnum{flex:0 0 auto}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);
-    box-shadow:var(--shadow);padding:11px 16px;border-radius:12px;font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    box-shadow:var(--shadow);padding:11px 16px;border-radius:12px;font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;z-index:80}
+  .toast.show{opacity:1}
   .avatar{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:800;flex:0 0 auto}
   .divider{height:1px;background:var(--border);margin:14px 0}
   .link{color:var(--brand);font-weight:600;cursor:pointer}
   .anim{animation:fade .3s ease}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-  @media(max-width:1150px){
-    .col2{grid-template-columns:1fr!important}
-  }
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(5,8,18,.6);display:grid;place-items:center;padding:16px;z-index:90}
+  .modal .card{width:100%;max-width:480px;max-height:88vh;overflow-y:auto}
+
+  /* sino */
+  .dot{position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;border-radius:99px;background:var(--bad);color:#fff;
+    font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+  .dot[hidden]{display:none}
+  .panel{position:absolute;right:0;top:44px;width:320px;max-width:calc(100vw - 32px);background:var(--surface);
+    border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:8px;z-index:70}
+  .notif{padding:9px 10px;border-radius:10px;font-size:13px}
+  .notif:hover{background:var(--surface2)}
+  .notif.un{background:color-mix(in srgb,var(--brand) 7%,transparent)}
+
+  /* chat */
+  .chatbox{display:flex;flex-direction:column;height:calc(100vh - 210px);min-height:340px}
+  .msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:4px}
+  .msg{display:flex;gap:10px;max-width:88%}
+  .msg.me{flex-direction:row-reverse;align-self:flex-end}
+  .bubble{padding:10px 14px;border-radius:16px;background:var(--surface2);font-size:13.5px}
+  .msg.me .bubble{background:var(--brand);color:#fff}
+  .ava{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;background:var(--brand);color:#fff;font-size:14px}
+  .msg.me .ava{background:var(--surface2);color:var(--fg)}
+
+  /* chart tooltip */
+  .chartwrap{position:relative}
+  .ctip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:7px 10px;font-size:12px;box-shadow:var(--shadow);opacity:0;transition:opacity .12s;white-space:nowrap;z-index:5}
+  .ctip.on{opacity:1}
+  .vline{position:absolute;top:0;bottom:0;width:1px;background:var(--brand);opacity:0;pointer-events:none}
+  .vline.on{opacity:.5}
+
+  @media(max-width:1150px){ .col2{grid-template-columns:1fr!important} }
   @media(max-width:880px){
-    .app{grid-template-columns:1fr}
-    .side{position:fixed;z-index:50;width:250px;transform:translateX(-100%);transition:.2s;box-shadow:var(--shadow)}
+    .side{position:fixed;z-index:60;transform:translateX(-100%);transition:.2s;box-shadow:var(--shadow)}
     .side.open{transform:none}
     .kpis{grid-template-columns:repeat(2,1fr)}
-    .col2{grid-template-columns:1fr!important}
     .content .grid{grid-template-columns:1fr!important}
     .menu-btn{display:grid!important}
-    .scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:45}
+    .scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:55}
     .scrim.on{display:block}
+    .content,.top{padding-left:16px;padding-right:16px}
   }
   .menu-btn{display:none}
+
+  /* impressão (relatório) */
+  @media print{
+    .side,.top,.no-print{display:none!important}
+    body{background:#fff;color:#000}
+    .card{box-shadow:none;border:1px solid #ddd}
+    .content{padding:0;max-width:100%}
+  }
 </style>
 
 <div class="app">
@@ -165,63 +204,99 @@
       <b>TrafegoAI</b>
     </div>
     <nav class="nav" id="nav"></nav>
-    <div class="foot">Demonstração • dados fictícios<br>Google · Meta · TikTok</div>
+    <div class="foot">Google · Meta · TikTok<br><span id="syncInfo"></span></div>
   </aside>
-  <div class="scrim" id="scrim" onclick="toggleMenu()"></div>
+  <div class="scrim" id="scrim"></div>
 
   <div class="main">
     <header class="top">
       <div class="row">
-        <button class="iconbtn menu-btn" onclick="toggleMenu()" aria-label="Menu">
+        <button class="iconbtn menu-btn" id="menuBtn" aria-label="Abrir menu">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
-        <span class="pill v demo-tag">Modo demonstração</span>
+        <span class="muted" style="font-size:12.5px" id="topSync"></span>
       </div>
-      <button class="iconbtn" id="themeBtn" onclick="toggleTheme()" aria-label="Alternar tema"></button>
+      <div class="row" style="gap:8px;position:relative">
+        <button class="iconbtn" id="bellBtn" aria-label="Notificações">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="dot" id="bellDot" hidden></span>
+        </button>
+        <button class="iconbtn" id="themeBtn" aria-label="Alternar tema"></button>
+        <div id="bellPanel"></div>
+      </div>
     </header>
     <main class="content" id="view"></main>
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div id="modalHost"></div>
 
 <script>
-/* ────────────────────────────────────────────────────────────────
-   TrafegoAI — app de demonstração (100% no navegador, sem backend).
-   Roteamento simples + camada de dados fictícios estável (RNG seeded).
-──────────────────────────────────────────────────────────────── */
-const BRL = n => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n);
-const CMP = n => new Intl.NumberFormat('pt-BR',{notation:'compact',maximumFractionDigits:1}).format(n);
-const NUM = n => new Intl.NumberFormat('pt-BR').format(Math.round(n));
-const el = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild;};
+/* ═══════════════════════════════════════════════════════════════
+   TrafegoAI — painel de tráfego pago (Google, Meta, TikTok)
+   Roda inteiro no navegador. Estado salvo em localStorage.
+   ═══════════════════════════════════════════════════════════════ */
 
-// RNG determinístico
+const BRL = n => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n||0);
+const CMP = n => new Intl.NumberFormat('pt-BR',{notation:'compact',maximumFractionDigits:1}).format(n||0);
+const NUM = n => new Intl.NumberFormat('pt-BR').format(Math.round(n||0));
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ── RNG determinístico ──
 function rng(seed){return function(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};}
-const R=rng(20260727); const rr=(a,b)=>a+R()*(b-a); const ri=(a,b)=>Math.floor(rr(a,b+1));
-const pick=a=>a[ri(0,a.length-1)];
+function hash(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
 
-// ── seed de dados ──
+// ═══ ESTADO PERSISTIDO ═══
+const KEY='trafegoai_state_v1';
+const DEFAULT_STATE={theme:null,campaignStatus:{},budgets:{},recStatus:{},rules:{},guide:{},clients:[],
+  notifs:[],read:[],chat:[],creatives:[],goalsExtra:[]};
+let S;
+function loadState(){
+  try{const raw=localStorage.getItem(KEY);S=raw?Object.assign({},DEFAULT_STATE,JSON.parse(raw)):Object.assign({},DEFAULT_STATE);}
+  catch(e){S=Object.assign({},DEFAULT_STATE);}
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+loadState();
+
+// ═══ DADOS BASE ═══
 const PLAT={google:{n:'Google',c:'#4285F4'},meta:{n:'Meta',c:'#3b82f6'},tiktok:{n:'TikTok',c:'#14b8a6'}};
-const clients=[
+const platArr=['google','meta','tiktok'];
+const BASE_CLIENTS=[
   {id:'c1',name:'Loja Aurora',color:'#6d4aff',owner:'Marina Alves',email:'marina@lojaaurora.com.br',phone:'(11) 98888-1201',seg:'E-commerce de moda',since:'jan/2025'},
   {id:'c2',name:'FitPro Suplementos',color:'#16a34a',owner:'Rafael Nunes',email:'rafael@fitprosupps.com',phone:'(21) 97777-3410',seg:'Suplementos / saúde',since:'mar/2025'},
   {id:'c3',name:'Studio Bela Pele',color:'#d97706',owner:'Camila Rocha',email:'camila@studiobelapele.com',phone:'(31) 96666-5588',seg:'Estética / skincare',since:'set/2025'},
 ];
-const cnames=['Remarketing Quente','Prospecção Fria','Escala Vencedora','Catálogo Dinâmico','Vídeo Depoimento','Público Semelhante 1%','Retargeting Carrinho','Topo de Funil'];
-const platArr=['google','meta','tiktok'];
-let campaigns=[];
-clients.forEach((cl,ci)=>{
+const CNAMES=['Remarketing Quente','Prospecção Fria','Escala Vencedora','Catálogo Dinâmico','Vídeo Depoimento','Público Semelhante 1%','Retargeting Carrinho','Topo de Funil'];
+
+function allClients(){return BASE_CLIENTS.concat(S.clients||[]);}
+function findClient(id){return allClients().find(c=>c.id===id);}
+
+// campanhas geradas deterministicamente por cliente
+function genCampaigns(client,idx){
+  const R=rng(hash(client.id)+7);const rr=(a,b)=>a+R()*(b-a);
+  const out=[];
   for(let k=0;k<4;k++){
-    const spend=rr(2200,9000), roas=rr(1.2,5.2), rev=spend*roas, clicks=Math.round(spend*rr(3,7)),
-      imp=Math.round(clicks*rr(60,120)), conv=Math.max(1,Math.round(clicks*rr(.03,.11)));
-    campaigns.push({
-      id:cl.id+'-k'+k, client:cl.id, name:pick(cnames)+' '+(k+1),
-      plat:platArr[(ci+k)%3], status:k===3?'paused':k===2?'learning':'active',
-      spend, rev, roas:+roas.toFixed(2), cpa:+(spend/conv).toFixed(2), ctr:+(clicks/imp*100).toFixed(2),
-      conv, clicks, imp, budget:Math.round(rr(80,500)), freq:+rr(1.4,6).toFixed(1)
-    });
+    const spend=rr(2200,9000),roas=rr(1.2,5.2),rev=spend*roas,
+      clicks=Math.round(spend*rr(3,7)),imp=Math.round(clicks*rr(60,120)),
+      conv=Math.max(1,Math.round(clicks*rr(.03,.11)));
+    const id=client.id+'-k'+k;
+    out.push({id,client:client.id,name:CNAMES[Math.floor(R()*CNAMES.length)]+' '+(k+1),
+      plat:platArr[(idx+k)%3],status:k===3?'paused':k===2?'learning':'active',
+      spend,rev,roas:+roas.toFixed(2),cpa:+(spend/conv).toFixed(2),ctr:+(clicks/imp*100).toFixed(2),
+      conv,clicks,imp,budget:Math.round(rr(80,500)),freq:+rr(1.4,6).toFixed(1)});
   }
-});
-const connections=[
+  return out;
+}
+function allCampaigns(){
+  const list=[];
+  allClients().forEach((c,i)=>genCampaigns(c,i).forEach(x=>list.push(x)));
+  // aplica overrides salvos
+  return list.map(c=>({...c,
+    status:S.campaignStatus[c.id]||c.status,
+    budget:S.budgets[c.id]!=null?S.budgets[c.id]:c.budget}));
+}
+
+const BASE_CONNECTIONS=[
   {id:'x1',client:'c1',plat:'google',acc:'Loja Aurora — Google Ads',status:'active',sync:'há 6 min'},
   {id:'x2',client:'c1',plat:'meta',acc:'Loja Aurora — Meta Business',status:'active',sync:'há 6 min'},
   {id:'x3',client:'c2',plat:'tiktok',acc:'FitPro — TikTok Ads',status:'active',sync:'há 12 min'},
@@ -229,394 +304,904 @@ const connections=[
   {id:'x5',client:'c3',plat:'google',acc:'Bela Pele — Google Ads',status:'error',sync:'há 4 h'},
   {id:'x6',client:'c3',plat:'meta',acc:'Bela Pele — Meta Business',status:'active',sync:'há 20 min'},
 ];
-const goals=[
-  {client:'c1',label:'ROAS Loja Aurora',metric:'roas',cur:3.1,tgt:3.5,proj:3.6},
-  {client:'c1',label:'Orçamento mensal',metric:'budget',cur:21400,tgt:30000,proj:29800},
-  {client:'c2',label:'CPA-alvo FitPro',metric:'cpa',cur:47,tgt:40,proj:42},
-];
-let recs=[
-  {id:'r1',title:'Realocar 20% da verba p/ "Escala Vencedora"',impact:'alto',plat:'meta',why:'ROAS 4,8 vs média 2,1; ainda com espaço de escala e frequência saudável.',gain:'+R$ 3.400/mês',status:'open'},
-  {id:'r2',title:'Pausar conjunto "Prospecção Fria 3"',impact:'alto',plat:'google',why:'CPA R$ 92 (meta R$ 45) há 9 dias, sem conversões nos últimos 3.',gain:'−R$ 1.900 desperdício',status:'open'},
-  {id:'r3',title:'Trocar criativo com fadiga em "Vídeo Depoimento"',impact:'médio',plat:'tiktok',why:'CTR caiu 38% e a frequência subiu para 5,8 nos últimos 14 dias.',gain:'+0,6 pt CTR',status:'open'},
-  {id:'r4',title:'Concentrar lances no pico das 19h–22h',impact:'médio',plat:'google',why:'72% das conversões acontecem nesse intervalo, com CPA 31% menor.',gain:'−14% CPA',status:'open'},
-];
-const products=[
-  {name:'Mini projetor portátil',cat:'Eletrônicos',mkt:'TikTok Shop',country:'Brasil',score:94,g:120,pmin:89,pmax:249,comp:'média',insight:'Unboxing no escuro + prova social. Vale tráfego pago em Reels/TikTok.'},
-  {name:'Escova alisadora 3 em 1',cat:'Beleza',mkt:'Shopee',country:'Brasil',score:88,g:64,pmin:59,pmax:159,comp:'alta',insight:'Antes/depois em 15s. Feminino 25-44. ROAS alto em Advantage+.'},
-  {name:'Garrafa térmica 2L',cat:'Fitness',mkt:'Mercado Livre',country:'Portugal',score:81,g:41,pmin:39,pmax:99,comp:'baixa',insight:'Trend de hidratação. UGC + desconto por tempo. Bom p/ Spark Ads.'},
-  {name:'Massageador EMS de pescoço',cat:'Saúde',mkt:'Amazon',country:'México',score:77,g:33,pmin:79,pmax:199,comp:'média',insight:'Dor de trabalho remoto. Depoimento + garantia. Meta + Shopping.'},
-];
-const videos=[
-  {t:'Ela testou por 30 dias e...',net:'TikTok',views:2400000,g:180,fmt:'Depoimento 9:16',hook:'"Não acreditava até ver o resultado no dia 7."',why:'Curiosidade + timeline concreta prendem nos 3s.'},
-  {t:'3 erros que queimam sua verba',net:'Reels',views:980000,g:96,fmt:'Educativo rápido',hook:'"O erro nº 2 custou R$ 4 mil pro meu cliente."',why:'Perda + número específico geram medo e autoridade.'},
-  {t:'POV: seu anúncio finalmente vendeu',net:'Shorts',views:1350000,g:210,fmt:'POV humor',hook:'Corte seco no problema, sem intro.',why:'Formato POV + humor elevam retenção e compartilhamento.'},
-  {t:'Unboxing do produto que viralizou',net:'YouTube',views:640000,g:58,fmt:'Unboxing',hook:'"Comprei o mais vendido do TikTok Shop."',why:'Ancoragem no viral + entrega de expectativa.'},
-];
-let rules=[
-  {id:'l1',name:'Pausar conjunto caro',on:true,cond:'CPA > R$ 60 por 3 dias',act:'Pausar conjunto',floor:20,cap:500,maxpct:100,fires:3,last:'há 12 min'},
-  {id:'l2',name:'Escalar vencedora',on:true,cond:'ROAS > 4 e frequência < 3',act:'Aumentar verba +20%',floor:50,cap:600,maxpct:20,fires:5,last:'há 12 min'},
-  {id:'l3',name:'Proteger orçamento',on:false,cond:'Gasto diário > teto',act:'Pausar campanha',floor:0,cap:400,maxpct:100,fires:0,last:null},
-];
-const windows=[
-  {net:'TikTok',hours:['12h','19h','21h'],note:'Pico de retenção à noite; testes ao meio-dia.'},
-  {net:'Instagram Reels',hours:['11h','13h','20h'],note:'Almoço e pós-jantar convertem melhor.'},
-  {net:'YouTube Shorts',hours:['18h','20h','22h'],note:'Consumo cresce à noite; alinhe com horário de compra.'},
-];
-// série 30 dias agregada
-const series=Array.from({length:30},(_,i)=>{const base=12000*(1+i*.006)*rr(.9,1.12);return{spend:Math.round(base),rev:Math.round(base*rr(1.8,3.2))};});
-const guideDone={}; // estado do guia por cliente
+let connections=BASE_CONNECTIONS.map(c=>({...c}));
 
-// ── agregações ──
-const sum=(arr,f)=>arr.reduce((a,x)=>a+f(x),0);
-function totals(list){
-  const spend=sum(list,c=>c.spend), rev=sum(list,c=>c.rev), conv=sum(list,c=>c.conv),
-    clicks=sum(list,c=>c.clicks), imp=sum(list,c=>c.imp);
-  return{spend,rev,roas:spend?+(rev/spend).toFixed(2):0,roi:spend?+((rev/spend-1)*100).toFixed(0):0,
-    cpa:conv?+(spend/conv).toFixed(2):0,cpc:clicks?+(spend/clicks).toFixed(2):0,cpm:imp?+(spend/imp*1000).toFixed(2):0,
-    ctr:imp?+(clicks/imp*100).toFixed(2):0,cr:clicks?+(conv/clicks*100).toFixed(2):0,conv,clicks,imp};
+const BASE_GOALS=[
+  {id:'g1',client:'c1',label:'ROAS Loja Aurora',metric:'roas',cur:3.1,tgt:3.5,proj:3.6},
+  {id:'g2',client:'c1',label:'Orçamento mensal',metric:'budget',cur:21400,tgt:30000,proj:29800},
+  {id:'g3',client:'c2',label:'CPA-alvo FitPro',metric:'cpa',cur:47,tgt:40,proj:42},
+];
+function allGoals(){return BASE_GOALS.concat(S.goalsExtra||[]);}
+
+const BASE_RECS=[
+  {id:'r1',title:'Realocar 20% da verba para "Escala Vencedora"',impact:'alto',plat:'meta',why:'ROAS 4,8 contra média de 2,1; ainda há espaço de escala e a frequência está saudável.',gain:'+R$ 3.400/mês'},
+  {id:'r2',title:'Pausar conjunto "Prospecção Fria 3"',impact:'alto',plat:'google',why:'CPA de R$ 92 (meta R$ 45) há 9 dias, sem conversões nos últimos 3.',gain:'−R$ 1.900 de desperdício'},
+  {id:'r3',title:'Trocar criativo com fadiga em "Vídeo Depoimento"',impact:'médio',plat:'tiktok',why:'CTR caiu 38% e a frequência subiu para 5,8 nos últimos 14 dias.',gain:'+0,6 ponto de CTR'},
+  {id:'r4',title:'Concentrar lances no pico das 19h–22h',impact:'médio',plat:'google',why:'72% das conversões acontecem nesse intervalo, com CPA 31% menor.',gain:'−14% de CPA'},
+];
+function allRecs(){return BASE_RECS.map(r=>({...r,status:S.recStatus[r.id]||'open'}));}
+
+const BASE_RULES=[
+  {id:'l1',name:'Pausar conjunto caro',on:true,cond:'CPA acima de R$ 60 por 3 dias',act:'Pausar conjunto',floor:20,cap:500,maxpct:100,fires:3,last:'há 12 min'},
+  {id:'l2',name:'Escalar vencedora',on:true,cond:'ROAS acima de 4 e frequência abaixo de 3',act:'Aumentar verba em 20%',floor:50,cap:600,maxpct:20,fires:5,last:'há 12 min'},
+  {id:'l3',name:'Proteger orçamento',on:false,cond:'Gasto diário acima do teto',act:'Pausar campanha',floor:0,cap:400,maxpct:100,fires:0,last:null},
+];
+function allRules(){return BASE_RULES.map(r=>({...r,...(S.rules[r.id]||{})}));}
+
+const PRODUCTS=[
+  {name:'Mini projetor portátil',cat:'Eletrônicos',mkt:'TikTok Shop',country:'Brasil',score:94,g:120,pmin:89,pmax:249,comp:'média',insight:'Unboxing no escuro com prova social. Vale tráfego pago em Reels e TikTok.'},
+  {name:'Escova alisadora 3 em 1',cat:'Beleza',mkt:'Shopee',country:'Brasil',score:88,g:64,pmin:59,pmax:159,comp:'alta',insight:'Antes e depois em 15 segundos. Público feminino 25-44. ROAS alto no Advantage+.'},
+  {name:'Garrafa térmica 2L',cat:'Fitness',mkt:'Mercado Livre',country:'Portugal',score:81,g:41,pmin:39,pmax:99,comp:'baixa',insight:'Tendência de hidratação. Vídeo de cliente real com desconto por tempo limitado.'},
+  {name:'Massageador EMS de pescoço',cat:'Saúde',mkt:'Amazon',country:'México',score:77,g:33,pmin:79,pmax:199,comp:'média',insight:'Dor de trabalho remoto. Depoimento com garantia. Meta e Google Shopping.'},
+];
+const VIDEOS=[
+  {t:'Ela testou por 30 dias e o resultado surpreendeu',net:'TikTok',views:2400000,g:180,fmt:'Depoimento 9:16',hook:'"Não acreditava até ver o resultado no dia 7."',why:'Curiosidade somada a uma linha do tempo concreta prende nos 3 primeiros segundos.'},
+  {t:'3 erros que queimam sua verba de anúncio',net:'Reels',views:980000,g:96,fmt:'Educativo rápido',hook:'"O erro número 2 custou R$ 4 mil ao meu cliente."',why:'Perda com número específico gera atenção imediata e transmite autoridade.'},
+  {t:'POV: seu anúncio finalmente vendeu',net:'Shorts',views:1350000,g:210,fmt:'POV com humor',hook:'Corte seco direto no problema, sem introdução.',why:'Formato POV com humor eleva retenção e compartilhamento.'},
+  {t:'Unboxing do produto que viralizou',net:'YouTube',views:640000,g:58,fmt:'Unboxing',hook:'"Comprei o mais vendido do TikTok Shop."',why:'Ancoragem no viral com entrega da expectativa prometida.'},
+];
+const WINDOWS=[
+  {net:'TikTok',hours:['12h','19h','21h'],note:'Pico de retenção à noite; teste também ao meio-dia.'},
+  {net:'Instagram Reels',hours:['11h','13h','20h'],note:'Almoço e pós-jantar convertem melhor.'},
+  {net:'YouTube Shorts',hours:['18h','20h','22h'],note:'Consumo cresce à noite; alinhe com o horário de compra.'},
+];
+
+// série de 30 dias com datas reais
+const series=(()=>{
+  const R=rng(20260727);const out=[];const today=new Date();
+  for(let i=29;i>=0;i--){
+    const d=new Date(today.getTime()-i*86400000);
+    const base=12000*(1+(29-i)*.006)*(0.9+R()*0.22);
+    out.push({date:d,spend:Math.round(base),rev:Math.round(base*(1.8+R()*1.4))});
+  }
+  return out;
+})();
+const fmtDate=d=>d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+
+// notificações
+const BASE_NOTIFS=[
+  {id:'n1',kind:'anomaly',msg:'Pico de gasto em "Catálogo Dinâmico": 182% acima da média diária.',at:'há 22 min'},
+  {id:'n2',kind:'rule',msg:'Regra "Escalar vencedora" disparou em 2 conjuntos.',at:'há 12 min'},
+  {id:'n3',kind:'anomaly',msg:'Conta Google "Bela Pele" sem entrega — verifique o rastreamento.',at:'há 4 h'},
+];
+function allNotifs(){return (S.notifs||[]).concat(BASE_NOTIFS);}
+function unreadCount(){return allNotifs().filter(n=>!(S.read||[]).includes(n.id)).length;}
+function pushNotif(msg,kind){
+  S.notifs=[{id:'u'+Date.now(),kind:kind||'info',msg,at:'agora mesmo'}].concat(S.notifs||[]).slice(0,20);
+  save();renderBell();
 }
 
-// ── charts (SVG) ──
+// ═══ AGREGAÇÕES ═══
+const sum=(a,f)=>a.reduce((x,y)=>x+f(y),0);
+function totals(list){
+  const spend=sum(list,c=>c.spend),rev=sum(list,c=>c.rev),conv=sum(list,c=>c.conv),
+    clicks=sum(list,c=>c.clicks),imp=sum(list,c=>c.imp);
+  return{spend,rev,roas:spend?+(rev/spend).toFixed(2):0,roi:spend?Math.round((rev/spend-1)*100):0,
+    cpa:conv?+(spend/conv).toFixed(2):0,cpc:clicks?+(spend/clicks).toFixed(2):0,
+    cpm:imp?+(spend/imp*1000).toFixed(2):0,ctr:imp?+(clicks/imp*100).toFixed(2):0,
+    cr:clicks?+(conv/clicks*100).toFixed(2):0,conv,clicks,imp};
+}
+// deltas estáveis (mesmo valor entre renders)
+const DELTAS=(()=>{const R=rng(555);const o={};['spend','rev','roas','roi','cpa','ctr','conv','cpc'].forEach(k=>o[k]=+((R()*44)-18).toFixed(1));return o;})();
+
+// ═══ GRÁFICOS ═══
 function areaChart(data){
-  const W=680,H=210,pad=8, max=Math.max(...data.map(d=>Math.max(d.spend,d.rev)))*1.08;
-  const x=i=>pad+i*(W-2*pad)/(data.length-1), y=v=>H-pad-(v/max)*(H-2*pad);
-  const path=(k)=>data.map((d,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(d[k]).toFixed(1)).join(' ');
-  const area='M'+x(0)+' '+y(data[0].rev)+data.map((d,i)=>'L'+x(i).toFixed(1)+' '+y(d.rev).toFixed(1)).join('')+'L'+x(data.length-1)+' '+(H-pad)+'L'+pad+' '+(H-pad)+'Z';
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="none" style="display:block">
-    <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--brand)" stop-opacity=".33"/><stop offset="1" stop-color="var(--brand)" stop-opacity="0"/></linearGradient></defs>
-    ${[.25,.5,.75].map(f=>`<line x1="${pad}" x2="${W-pad}" y1="${H*f}" y2="${H*f}" stroke="var(--border)" stroke-dasharray="3 4"/>`).join('')}
-    <path d="${area}" fill="url(#ga)"/>
-    <path d="${path('rev')}" fill="none" stroke="var(--brand)" stroke-width="2.4"/>
-    <path d="${path('spend')}" fill="none" stroke="var(--warn)" stroke-width="2" stroke-dasharray="1 0"/>
-    <circle cx="${x(data.length-1)}" cy="${y(data[data.length-1].rev)}" r="4" fill="var(--brand)"/>
-  </svg>`;
+  const W=680,H=210,pad=8,max=Math.max(...data.map(d=>Math.max(d.spend,d.rev)))*1.08;
+  const x=i=>pad+i*(W-2*pad)/(data.length-1),y=v=>H-pad-(v/max)*(H-2*pad);
+  const line=k=>data.map((d,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(d[k]).toFixed(1)).join(' ');
+  const area='M'+x(0)+' '+y(data[0].rev)+data.map((d,i)=>'L'+x(i).toFixed(1)+' '+y(d.rev).toFixed(1)).join('')+
+    'L'+x(data.length-1)+' '+(H-pad)+'L'+pad+' '+(H-pad)+'Z';
+  return `<div class="chartwrap" id="chartwrap">
+    <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="none" style="display:block;height:210px">
+      <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="var(--brand)" stop-opacity=".33"/><stop offset="1" stop-color="var(--brand)" stop-opacity="0"/></linearGradient></defs>
+      ${[.25,.5,.75].map(f=>`<line x1="${pad}" x2="${W-pad}" y1="${H*f}" y2="${H*f}" stroke="var(--border)" stroke-dasharray="3 4"/>`).join('')}
+      <path d="${area}" fill="url(#ga)"/>
+      <path d="${line('rev')}" fill="none" stroke="var(--brand)" stroke-width="2.4"/>
+      <path d="${line('spend')}" fill="none" stroke="var(--warn)" stroke-width="2"/>
+      <circle id="chartDot" cx="${x(data.length-1)}" cy="${y(data[data.length-1].rev)}" r="4" fill="var(--brand)"/>
+    </svg>
+    <div class="vline" id="vline"></div>
+    <div class="ctip" id="ctip"></div>
+  </div>`;
+}
+function bindChart(){
+  const wrap=document.getElementById('chartwrap');if(!wrap)return;
+  const tip=document.getElementById('ctip'),vl=document.getElementById('vline');
+  const move=e=>{
+    const r=wrap.getBoundingClientRect();
+    const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const frac=Math.max(0,Math.min(1,cx/r.width));
+    const i=Math.round(frac*(series.length-1));const d=series[i];
+    const px=(i/(series.length-1))*r.width;
+    vl.style.left=px+'px';vl.classList.add('on');
+    tip.innerHTML=`<b>${fmtDate(d.date)}</b><br>Receita: <b class="num">${BRL(d.rev)}</b><br>Gasto: <b class="num">${BRL(d.spend)}</b>`;
+    tip.classList.add('on');
+    const tw=tip.offsetWidth||150;
+    tip.style.left=Math.max(0,Math.min(r.width-tw,px-tw/2))+'px';
+    tip.style.top='8px';
+  };
+  const out=()=>{tip.classList.remove('on');vl.classList.remove('on');};
+  wrap.addEventListener('mousemove',move);wrap.addEventListener('mouseleave',out);
+  wrap.addEventListener('touchstart',move,{passive:true});wrap.addEventListener('touchmove',move,{passive:true});
+  wrap.addEventListener('touchend',out);
 }
 function donut(segs){
-  const tot=sum(segs,s=>s.v)||1; let a=-Math.PI/2; const R0=52,R1=78,cx=95,cy=95; let out='';
+  const tot=sum(segs,s=>s.v)||1;let a=-Math.PI/2;const R0=52,R1=78,cx=95,cy=95;let out='';
   segs.forEach(s=>{const ang=s.v/tot*Math.PI*2,b=a+ang;
-    const p=(r,t)=>[cx+r*Math.cos(t),cy+r*Math.sin(t)]; const large=ang>Math.PI?1:0;
+    const p=(r,t)=>[cx+r*Math.cos(t),cy+r*Math.sin(t)];const lg=ang>Math.PI?1:0;
     const[x0,y0]=p(R1,a),[x1,y1]=p(R1,b),[x2,y2]=p(R0,b),[x3,y3]=p(R0,a);
-    out+=`<path d="M${x0} ${y0} A${R1} ${R1} 0 ${large} 1 ${x1} ${y1} L${x2} ${y2} A${R0} ${R0} 0 ${large} 0 ${x3} ${y3}Z" fill="${s.c}"/>`;a=b;});
+    out+=`<path d="M${x0} ${y0} A${R1} ${R1} 0 ${lg} 1 ${x1} ${y1} L${x2} ${y2} A${R0} ${R0} 0 ${lg} 0 ${x3} ${y3}Z" fill="${s.c}"/>`;a=b;});
   return `<svg viewBox="0 0 190 190" width="170" height="170">${out}</svg>`;
 }
-function spark(vals){
-  const W=150,H=40,max=Math.max(...vals),min=Math.min(...vals),rng=max-min||1;
-  const x=i=>i*W/(vals.length-1),y=v=>H-2-((v-min)/rng)*(H-6);
-  const d=vals.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+function spark(seed){
+  const R=rng(seed);const vals=Array.from({length:7},()=>30+R()*70);
+  const W=150,H=40,mx=Math.max(...vals),mn=Math.min(...vals),rg=mx-mn||1;
+  const d=vals.map((v,i)=>(i?'L':'M')+(i*W/6).toFixed(1)+' '+(H-2-((v-mn)/rg)*(H-6)).toFixed(1)).join(' ');
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="40"><path d="${d}" fill="none" stroke="var(--brand)" stroke-width="2"/></svg>`;
 }
 function heatmap(){
-  const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];let out='<div style="display:grid;gap:3px">';
-  for(let d=0;d<7;d++){out+='<div style="display:grid;grid-template-columns:34px repeat(24,1fr);gap:2px;align-items:center">';
+  const R=rng(99);const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];let out='<div style="display:grid;gap:3px">';
+  for(let d=0;d<7;d++){
+    out+='<div style="display:grid;grid-template-columns:34px repeat(24,1fr);gap:2px;align-items:center">';
     out+=`<span class="lbl" style="font-size:10px">${days[d]}</span>`;
-    for(let h=0;h<24;h++){const peak=(h>=18&&h<=22)?1.8:(h>=11&&h<=14)?1.2:.5;const wk=(d===0||d===6)?1.2:1;
-      const v=Math.min(1,peak*wk*rr(.5,1.1)/2.2);
-      out+=`<span title="${days[d]} ${h}h" style="aspect-ratio:1;border-radius:3px;background:color-mix(in srgb,var(--brand) ${Math.round(8+v*88)}%,transparent)"></span>`;}
-    out+='</div>';}
+    for(let h=0;h<24;h++){
+      const peak=(h>=18&&h<=22)?1.8:(h>=11&&h<=14)?1.2:.5;const wk=(d===0||d===6)?1.2:1;
+      const v=Math.min(1,peak*wk*(.5+R()*.6)/2.2);
+      out+=`<span title="${days[d]} ${h}h" style="aspect-ratio:1;border-radius:3px;background:color-mix(in srgb,var(--brand) ${Math.round(8+v*88)}%,transparent)"></span>`;
+    }
+    out+='</div>';
+  }
   return out+'</div>';
 }
 
-// ── componentes ──
+// ═══ COMPONENTES ═══
 function statusPill(s){const m={active:['g','Ativa'],paused:['m','Pausada'],learning:['w','Aprendendo'],expired:['w','Expirada'],error:['b','Com erro']};const[c,t]=m[s]||['m',s];return `<span class="pill ${c}">${t}</span>`;}
-function platPill(p){return `<span class="pill" style="background:color-mix(in srgb,${PLAT[p].c} 16%,transparent);color:${PLAT[p].c}">${PLAT[p].n}</span>`;}
-function deltaEl(d,invert){const up=d>=0,good=invert?!up:up;return `<span class="d ${good?'up':'down'}">${up?'▲':'▼'} ${Math.abs(d)}%</span>`;}
-function kpi(label,val,d,invert){return `<div class="card kpi"><div class="lbl">${label}</div><div class="v num">${val}</div>${d!==undefined?deltaEl(d,invert):''}</div>`;}
-
-// ── telas ──
+function platPill(p){const x=PLAT[p];return x?`<span class="pill" style="background:color-mix(in srgb,${x.c} 16%,transparent);color:${x.c}">${x.n}</span>`:'';}
+function kpi(label,val,d,invert){
+  let del='';
+  if(d!==undefined){const up=d>=0,good=invert?!up:up;
+    del=`<div class="d ${good?'up':'down'}">${up?'▲':'▼'} ${Math.abs(d)}%</div>`;}
+  return `<div class="card kpi"><div class="lbl">${label}</div><div class="v num">${val}</div>${del}</div>`;
+}
 function head(t,s){return `<div class="pagehead"><h1>${t}</h1><p>${s}</p></div>`;}
 
+// ═══ TELAS ═══
 function viewDashboard(){
-  const t=totals(campaigns);const d=()=>+(rr(-18,26)).toFixed(1);
-  const best=[...campaigns].sort((a,b)=>b.roas-a.roas)[0], worst=[...campaigns].sort((a,b)=>a.roas-b.roas)[0];
-  const segs=platArr.map(p=>({c:PLAT[p].c,n:PLAT[p].n,v:sum(campaigns.filter(c=>c.plat===p),c=>c.spend)}));
-  return head('Dashboard unificado','Google + Meta + TikTok consolidados, com comparação vs. período anterior.')+`
+  const camps=allCampaigns();const t=totals(camps);
+  const best=[...camps].sort((a,b)=>b.roas-a.roas)[0],worst=[...camps].sort((a,b)=>a.roas-b.roas)[0];
+  const segs=platArr.map(p=>({c:PLAT[p].c,n:PLAT[p].n,v:sum(camps.filter(c=>c.plat===p),c=>c.spend)}));
+  const openRec=allRecs().find(r=>r.status==='open');
+  return head('Dashboard unificado','Google, Meta e TikTok consolidados, com comparação em relação ao período anterior.')+`
   <div class="kpis" style="margin-bottom:14px">
-    ${kpi('Investimento',BRL(t.spend),d(),true)}${kpi('Receita',BRL(t.rev),d())}
-    ${kpi('ROAS',t.roas+'x',d())}${kpi('ROI',t.roi+'%',d())}
-    ${kpi('CPA',BRL(t.cpa),d(),true)}${kpi('CTR',t.ctr+'%',d())}
+    ${kpi('Investimento',BRL(t.spend),DELTAS.spend,true)}${kpi('Receita',BRL(t.rev),DELTAS.rev)}
+    ${kpi('ROAS',t.roas+'x',DELTAS.roas)}${kpi('ROI',t.roi+'%',DELTAS.roi)}
+    ${kpi('CPA',BRL(t.cpa),DELTAS.cpa,true)}${kpi('CTR',t.ctr+'%',DELTAS.ctr)}
   </div>
   <div class="grid col2" style="grid-template-columns:1.7fr 1fr;margin-bottom:14px">
-    <div class="card"><div class="between" style="margin-bottom:8px"><h3 style="font-size:15px">Evolução: gasto × receita</h3>
-      <div class="row" style="font-size:12px;gap:14px"><span class="row" style="gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:var(--brand)"></span>Receita</span><span class="row" style="gap:5px"><span style="width:10px;height:3px;border-radius:3px;background:var(--warn)"></span>Gasto</span></div></div>
-      ${areaChart(series)}</div>
+    <div class="card"><div class="between" style="margin-bottom:8px">
+      <h3 style="font-size:15px">Evolução de gasto e receita</h3>
+      <div class="row" style="font-size:12px;gap:14px">
+        <span class="row" style="gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:var(--brand)"></span>Receita</span>
+        <span class="row" style="gap:5px"><span style="width:10px;height:3px;border-radius:3px;background:var(--warn)"></span>Gasto</span></div></div>
+      ${areaChart(series)}
+      <p class="muted" style="margin:8px 0 0;font-size:11.5px">Passe o cursor ou o dedo sobre o gráfico para ver os valores do dia.</p></div>
     <div class="card"><h3 style="font-size:15px;margin-bottom:6px">Verba por plataforma</h3>
       <div class="row" style="justify-content:center">${donut(segs)}</div>
-      <div class="row" style="justify-content:center;gap:14px;font-size:12px;flex-wrap:wrap">${segs.map(s=>`<span class="row" style="gap:5px"><span style="width:9px;height:9px;border-radius:99px;background:${s.c}"></span>${s.n} ${BRL(s.v)}</span>`).join('')}</div></div>
+      <div class="row" style="justify-content:center;gap:14px;font-size:12px;flex-wrap:wrap">
+        ${segs.map(s=>`<span class="row" style="gap:5px"><span style="width:9px;height:9px;border-radius:99px;background:${s.c}"></span>${s.n} ${BRL(s.v)}</span>`).join('')}</div></div>
   </div>
-  <div class="grid col2" style="grid-template-columns:1fr 1fr;margin-bottom:14px">
-    <div class="card"><h3 style="font-size:15px;margin-bottom:10px">Mapa de calor — conversões por horário</h3>${heatmap()}</div>
+  <div class="grid col2" style="grid-template-columns:1fr 1fr">
+    <div class="card"><h3 style="font-size:15px;margin-bottom:10px">Conversões por horário e dia</h3>${heatmap()}</div>
     <div class="grid" style="grid-template-columns:1fr 1fr">
-      <div class="card"><div class="lbl up">🏆 Melhor campanha</div><p style="margin:8px 0 0;font-weight:600">${best.name}</p><p class="muted" style="margin:2px 0 0;font-size:13px">ROAS ${best.roas}x</p></div>
-      <div class="card"><div class="lbl down">⚠ Pior campanha</div><p style="margin:8px 0 0;font-weight:600">${worst.name}</p><p class="muted" style="margin:2px 0 0;font-size:13px">ROAS ${worst.roas}x</p></div>
-      <div class="card"><div class="lbl" style="color:var(--warn)">🔥 Maior desperdício</div><p style="margin:8px 0 0;font-weight:600">${worst.name}</p><p class="muted" style="margin:2px 0 0;font-size:13px">CPA ${BRL(worst.cpa)}</p></div>
-      <div class="card"><div class="lbl" style="color:var(--brand)">💡 Oportunidade</div><p style="margin:8px 0 0;font-weight:600;font-size:13px">${recs[0].title}</p></div>
+      <div class="card"><div class="lbl up">Melhor campanha</div><p style="margin:8px 0 0;font-weight:600">${esc(best.name)}</p><p class="muted" style="margin:2px 0 0;font-size:13px">ROAS ${best.roas}x</p></div>
+      <div class="card"><div class="lbl down">Pior campanha</div><p style="margin:8px 0 0;font-weight:600">${esc(worst.name)}</p><p class="muted" style="margin:2px 0 0;font-size:13px">ROAS ${worst.roas}x</p></div>
+      <div class="card"><div class="lbl" style="color:var(--warn)">Maior desperdício</div><p style="margin:8px 0 0;font-weight:600">${esc(worst.name)}</p><p class="muted" style="margin:2px 0 0;font-size:13px">CPA ${BRL(worst.cpa)}</p></div>
+      <div class="card"><div class="lbl" style="color:var(--brand)">Oportunidade do dia</div><p style="margin:8px 0 0;font-weight:600;font-size:13px">${openRec?esc(openRec.title):'Tudo aplicado por aqui.'}</p></div>
     </div>
   </div>`;
 }
 
 function viewClients(){
-  return head('Clientes','Modo agência: escolha um perfil para ver como gerenciá-lo — contas, metas, IA e o guia de gestão.')+`
+  const camps=allCampaigns();
+  return head('Clientes','Escolha um perfil para ver como gerenciá-lo: contas, metas, diagnóstico e o guia de gestão.')+`
+  <div class="between" style="margin-bottom:14px"><span class="muted" style="font-size:13px">${allClients().length} perfis</span>
+    <button class="btn p" onclick="openNewClient()">+ Novo cliente</button></div>
   <div class="grid" style="grid-template-columns:repeat(3,1fr)">
-    ${clients.map(c=>{
-      const cc=campaigns.filter(x=>x.client===c.id);const t=totals(cc);
-      return `<div class="card clickable" onclick="go('client','${c.id}')">
-        <div class="row"><span class="avatar" style="background:${c.color}">${c.name[0]}</span>
-          <div style="min-width:0"><p style="font-weight:700;margin:0">${c.name}</p><p class="muted" style="margin:2px 0 0;font-size:12.5px">${c.seg}</p></div></div>
+    ${allClients().map(c=>{
+      const t=totals(camps.filter(x=>x.client===c.id));
+      return `<div class="card clickable" onclick="go('clientes/${c.id}')">
+        <div class="row"><span class="avatar" style="background:${c.color}">${esc(c.name[0])}</span>
+          <div style="min-width:0"><p style="font-weight:700;margin:0">${esc(c.name)}</p>
+          <p class="muted" style="margin:2px 0 0;font-size:12.5px">${esc(c.seg)}</p></div></div>
         <div class="divider"></div>
-        <div class="row between" style="font-size:13px"><span class="muted">ROAS</span><b class="num">${t.roas}x</b></div>
-        <div class="row between" style="font-size:13px;margin-top:4px"><span class="muted">Investimento (30d)</span><b class="num">${BRL(t.spend)}</b></div>
-        <p class="link" style="margin:12px 0 0;font-size:13px">Ver como gerenciar →</p>
-      </div>`;}).join('')}
+        <div class="between" style="font-size:13px"><span class="muted">ROAS</span><b class="num">${t.roas}x</b></div>
+        <div class="between" style="font-size:13px;margin-top:4px"><span class="muted">Investimento (30 dias)</span><b class="num">${BRL(t.spend)}</b></div>
+        <p class="link" style="margin:12px 0 0;font-size:13px">Ver como gerenciar →</p></div>`;}).join('')}
   </div>`;
 }
 
-function viewClient(id){
-  const c=clients.find(x=>x.id===id);const cc=campaigns.filter(x=>x.client===id);const t=totals(cc);
-  const cns=connections.filter(x=>x.client===id);const gs=goals.filter(x=>x.client===id);
-  const cnOk=cns.length&&cns.every(x=>x.status==='active');
-  const done=guideDone[id]||{};
-  const applied=recs.filter(r=>r.status==='applied').length, open=recs.filter(r=>r.status==='open').length;
-  const guide=[
-    {id:'accounts',t:'Revisar contas conectadas',d:cnOk?`${cns.length} contas ativas e sincronizando.`:'Há conta(s) expiradas ou com erro — reautentique para não perder dados.',done:cnOk,to:'connections',cta:'Ver conexões'},
-    {id:'goals',t:'Definir metas do cliente',d:gs.length?`${gs.length} meta(s) com projeção de fim de mês.`:'Nenhuma meta definida ainda — comece por ROAS ou CPA-alvo.',done:gs.length>0,to:'goals',cta:'Definir metas'},
-    {id:'diag',t:'Ler o diagnóstico da IA',d:'Veja o que vai bem e o que queima verba neste perfil, em linguagem simples.',done:!!done.diag,to:'recs',cta:'Abrir diagnóstico'},
-    {id:'recs',t:'Aplicar recomendações',d:applied?`${applied} aplicada(s); ${open} em aberto.`:`${open} recomendação(ões) esperando ação.`,done:applied>0,to:'recs',cta:'Ver recomendações'},
-    {id:'rules',t:'Ativar automações com guardrails',d:done.rules?'Regras se→então protegendo o orçamento.':'Sem automações ativas — crie regras com preview (dry-run).',done:!!done.rules,to:'automations',cta:'Configurar'},
-    {id:'report',t:'Agendar relatório white-label',d:done.report?'Relatório pronto para compartilhar por link ou PDF.':'Nenhum relatório para este cliente ainda.',done:!!done.report,to:null,cta:'Gerar relatório'},
+function buildGuide(id){
+  const cns=connections.filter(x=>x.client===id);
+  const gs=allGoals().filter(x=>x.client===id);
+  const done=(S.guide[id]||{});
+  const recs=allRecs();
+  const applied=recs.filter(r=>r.status==='applied').length,open=recs.filter(r=>r.status==='open').length;
+  const activeRules=allRules().filter(r=>r.on).length;
+  const cnOk=cns.length>0&&cns.every(x=>x.status==='active');
+  return [
+    {id:'accounts',t:'Revisar contas conectadas',d:cnOk?`${cns.length} conta(s) ativas e sincronizando.`:'Há contas expiradas ou com erro — reautentique para não perder dados.',done:cnOk,to:'conexoes',cta:'Ver conexões'},
+    {id:'goals',t:'Definir metas do cliente',d:gs.length?`${gs.length} meta(s) com projeção de fim de mês.`:'Nenhuma meta definida ainda — comece por ROAS ou CPA-alvo.',done:gs.length>0,to:'metas',cta:'Definir metas'},
+    {id:'diag',t:'Ler o diagnóstico da IA',d:'Veja o que vai bem e o que queima verba neste perfil, em linguagem simples.',done:!!done.diag,to:'recomendacoes',cta:'Abrir diagnóstico'},
+    {id:'recs',t:'Aplicar recomendações',d:applied?`${applied} aplicada(s) e ${open} em aberto.`:`${open} recomendação(ões) esperando ação.`,done:applied>0,to:'recomendacoes',cta:'Ver recomendações'},
+    {id:'rules',t:'Ativar automações com proteções',d:activeRules?`${activeRules} regra(s) ativa(s) protegendo o orçamento.`:'Sem automações ativas — crie regras com simulação prévia.',done:activeRules>0,to:'automacoes',cta:'Configurar'},
+    {id:'report',t:'Gerar relatório do cliente',d:done.report?'Relatório gerado e pronto para enviar.':'Nenhum relatório gerado para este cliente ainda.',done:!!done.report,to:'relatorio/'+id,cta:'Abrir relatório'},
   ];
+}
+
+function viewClient(id){
+  const c=findClient(id);
+  if(!c)return head('Cliente não encontrado','O perfil pode ter sido removido.')+`<button class="btn" onclick="go('clientes')">Voltar</button>`;
+  const cc=allCampaigns().filter(x=>x.client===id);const t=totals(cc);
+  const cns=connections.filter(x=>x.client===id);const gs=allGoals().filter(x=>x.client===id);
+  const guide=buildGuide(id);
   const dc=guide.filter(s=>s.done).length;const score=Math.round(dc/guide.length*100);
-  const hl=score>=80?['up','Perfil saudável','var(--good)']:score>=50?['','Precisa de atenção','var(--warn)']:['down','Requer ação urgente','var(--bad)'];
-  return `<p class="link" onclick="go('clients')" style="display:inline-flex;gap:5px;margin-bottom:12px">← Voltar para clientes</p>
+  const col=score>=80?'var(--good)':score>=50?'var(--warn)':'var(--bad)';
+  const lab=score>=80?'Perfil saudável':score>=50?'Precisa de atenção':'Requer ação urgente';
+  return `<p class="link" onclick="go('clientes')" style="display:inline-block;margin-bottom:12px">← Voltar para clientes</p>
   <div class="card between anim" style="margin-bottom:14px">
-    <div class="row"><span class="avatar" style="width:58px;height:58px;font-size:22px;background:${c.color}">${c.name[0]}</span>
-      <div><h1 style="font-size:23px">${c.name}</h1><p class="muted" style="margin:3px 0 0;font-size:13.5px">${c.seg} • cliente desde ${c.since}</p></div></div>
-    <div class="row" style="border:1px solid ${hl[2]}55;background:color-mix(in srgb,${hl[2]} 10%,transparent);padding:9px 16px;border-radius:14px;gap:12px">
-      <b style="font-size:24px;color:${hl[2]}" class="num">${score}%</b><div><div class="lbl">Saúde do perfil</div><b style="color:${hl[2]};font-size:13.5px">${hl[1]}</b></div></div>
+    <div class="row"><span class="avatar" style="width:58px;height:58px;font-size:22px;background:${c.color}">${esc(c.name[0])}</span>
+      <div><h1 style="font-size:23px">${esc(c.name)}</h1>
+      <p class="muted" style="margin:3px 0 0;font-size:13.5px">${esc(c.seg)} • cliente desde ${esc(c.since)}</p></div></div>
+    <div class="row" style="border:1px solid ${col}55;background:color-mix(in srgb,${col} 10%,transparent);padding:9px 16px;border-radius:14px;gap:12px">
+      <b class="num" style="font-size:24px;color:${col}">${score}%</b>
+      <div><div class="lbl">Saúde do perfil</div><b style="color:${col};font-size:13.5px">${lab}</b></div></div>
   </div>
   <div class="grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
-    ${[['Responsável',c.owner],['E-mail',c.email],['Telefone',c.phone],['Contas',cns.length+' conectadas']].map(([l,v])=>`<div class="card" style="padding:13px"><div class="lbl">${l}</div><p style="margin:5px 0 0;font-weight:600;font-size:13.5px;word-break:break-word">${v}</p></div>`).join('')}
+    ${[['Responsável',c.owner],['E-mail',c.email],['Telefone',c.phone],['Contas',cns.length+' conectadas']]
+      .map(([l,v])=>`<div class="card" style="padding:13px"><div class="lbl">${l}</div>
+      <p style="margin:5px 0 0;font-weight:600;font-size:13.5px;word-break:break-word">${esc(v)}</p></div>`).join('')}
   </div>
-  <div class="lbl" style="margin-bottom:8px">Desempenho — últimos 30 dias</div>
+  <div class="lbl" style="margin-bottom:8px">Desempenho nos últimos 30 dias</div>
   <div class="kpis" style="margin-bottom:16px">
-    ${kpi('Investimento',BRL(t.spend))}${kpi('Receita',BRL(t.rev))}${kpi('ROAS',t.roas+'x')}${kpi('CPA',BRL(t.cpa))}${kpi('CTR',t.ctr+'%')}${kpi('Conversões',NUM(t.conv))}
+    ${kpi('Investimento',BRL(t.spend))}${kpi('Receita',BRL(t.rev))}${kpi('ROAS',t.roas+'x')}
+    ${kpi('CPA',BRL(t.cpa))}${kpi('CTR',t.ctr+'%')}${kpi('Conversões',NUM(t.conv))}
   </div>
   <div class="grid col2" style="grid-template-columns:1.6fr 1fr">
     <div>
-      <div class="between" style="margin-bottom:8px"><h3 style="font-size:16px">Como gerenciar este perfil</h3><span class="pill v">${dc}/${guide.length} concluídos</span></div>
+      <div class="between" style="margin-bottom:8px"><h3 style="font-size:16px">Como gerenciar este perfil</h3>
+        <span class="pill v">${dc} de ${guide.length} concluídos</span></div>
       <div class="grid" style="gap:8px">
         ${guide.map((s,i)=>`<div class="card step" style="padding:14px">
-          <span class="stepnum">${s.done?`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg>`:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>`}</span>
-          <div style="flex:1;min-width:0"><p style="font-weight:650;margin:0"><span class="muted">${i+1}.</span> ${s.t}</p><p class="muted" style="margin:3px 0 0;font-size:13px">${s.d}</p></div>
-          <button class="btn sm" onclick="guideAct('${id}','${s.id}','${s.to||''}')">${s.cta} →</button>
+          <span>${s.done
+            ?`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/></svg>`
+            :`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>`}</span>
+          <div style="flex:1;min-width:0"><p style="font-weight:650;margin:0"><span class="muted">${i+1}.</span> ${s.t}</p>
+            <p class="muted" style="margin:3px 0 0;font-size:13px">${s.d}</p></div>
+          <button class="btn sm" onclick="guideAct('${id}','${s.id}','${s.to}')">${s.cta} →</button>
         </div>`).join('')}
       </div>
     </div>
     <div class="grid" style="gap:14px;align-content:start">
-      <div class="card"><h3 style="font-size:15px;margin-bottom:10px">Contas conectadas</h3>
-        ${cns.map(x=>`<div class="between" style="padding:8px 0;border-top:1px solid var(--border)"><div style="min-width:0"><p style="margin:0;font-size:13px;font-weight:600">${x.acc}</p><div class="row" style="gap:6px;margin-top:4px">${platPill(x.plat)}${statusPill(x.status)}</div></div></div>`).join('')}</div>
-      <div class="card"><h3 style="font-size:15px;margin-bottom:8px">Metas</h3>
-        ${gs.length?gs.map(g=>`<div style="padding:7px 0"><div class="between" style="font-size:13px"><b>${g.label}</b></div><p class="muted" style="margin:2px 0 0;font-size:12.5px">Atual ${g.metric==='roas'?g.cur+'x':BRL(g.cur)} • meta ${g.metric==='roas'?g.tgt+'x':BRL(g.tgt)}</p></div>`).join(''):'<p class="muted" style="font-size:13px">Sem metas definidas.</p>'}</div>
-      <div class="card" style="border-color:var(--brand);background:var(--brand-soft)"><h3 style="font-size:15px;margin-bottom:10px;color:var(--brand)">Ações rápidas</h3>
-        <div class="grid" style="gap:8px"><button class="btn p" onclick="go('recs')">Ver diagnóstico da IA</button><button class="btn" onclick="go('campaigns')">Gerenciar campanhas</button><button class="btn" onclick="toast('Relatório gerado (demo).')">Gerar relatório</button></div></div>
+      <div class="card"><h3 style="font-size:15px;margin-bottom:6px">Contas conectadas</h3>
+        ${cns.length?cns.map(x=>`<div style="padding:8px 0;border-top:1px solid var(--border)">
+          <p style="margin:0;font-size:13px;font-weight:600">${esc(x.acc)}</p>
+          <div class="row" style="gap:6px;margin-top:4px">${platPill(x.plat)}${statusPill(x.status)}</div></div>`).join('')
+          :'<p class="muted" style="font-size:13px;margin:6px 0 0">Nenhuma conta conectada ainda.</p>'}</div>
+      <div class="card"><h3 style="font-size:15px;margin-bottom:6px">Metas</h3>
+        ${gs.length?gs.map(g=>`<div style="padding:7px 0"><b style="font-size:13px">${esc(g.label)}</b>
+          <p class="muted" style="margin:2px 0 0;font-size:12.5px">Atual ${g.metric==='roas'?g.cur+'x':BRL(g.cur)} • meta ${g.metric==='roas'?g.tgt+'x':BRL(g.tgt)}</p></div>`).join('')
+          :'<p class="muted" style="font-size:13px">Sem metas definidas.</p>'}</div>
+      <div class="card" style="border-color:var(--brand);background:var(--brand-soft)">
+        <h3 style="font-size:15px;margin-bottom:10px;color:var(--brand)">Ações rápidas</h3>
+        <div class="grid" style="gap:8px">
+          <button class="btn p" onclick="go('recomendacoes')">Ver diagnóstico da IA</button>
+          <button class="btn" onclick="go('chat')">Perguntar ao assistente</button>
+          <button class="btn" onclick="go('relatorio/${id}')">Gerar relatório</button></div></div>
     </div>
   </div>`;
 }
 
+// ── campanhas com busca, filtros, ordenação e CSV ──
+const F={q:'',plat:'all',status:'all',sort:'spend',dir:-1};
+function filteredCampaigns(){
+  let r=allCampaigns();
+  if(F.plat!=='all')r=r.filter(c=>c.plat===F.plat);
+  if(F.status!=='all')r=r.filter(c=>c.status===F.status);
+  if(F.q){const q=F.q.toLowerCase();r=r.filter(c=>c.name.toLowerCase().includes(q));}
+  const clientName=id=>(findClient(id)||{}).name||'';
+  return r.sort((a,b)=>{
+    let av,bv;
+    if(F.sort==='name'){av=a.name;bv=b.name;}
+    else if(F.sort==='client'){av=clientName(a.client);bv=clientName(b.client);}
+    else{av=a[F.sort];bv=b[F.sort];}
+    return av>bv?F.dir:av<bv?-F.dir:0;
+  });
+}
 function viewCampaigns(){
-  return head('Campanhas','Tabela unificada das 3 plataformas. Pause, ative e acompanhe as métricas.')+`
-  <div class="card twrap" style="padding:6px 6px">
-    <table><thead><tr><th>Campanha</th><th>Plataforma</th><th>Status</th><th style="text-align:right">Gasto</th><th style="text-align:right">Receita</th><th style="text-align:right">ROAS</th><th style="text-align:right">CPA</th><th style="text-align:right">CTR</th><th></th></tr></thead>
-    <tbody>${campaigns.map(c=>`<tr>
-      <td><b>${c.name}</b></td><td>${platPill(c.plat)}</td><td>${statusPill(c.status)}</td>
-      <td style="text-align:right" class="num">${BRL(c.spend)}</td><td style="text-align:right" class="num">${BRL(c.rev)}</td>
-      <td style="text-align:right;font-weight:700" class="num">${c.roas}x</td><td style="text-align:right" class="num">${BRL(c.cpa)}</td><td style="text-align:right" class="num">${c.ctr}%</td>
-      <td style="text-align:right"><button class="btn sm" onclick="togglePause('${c.id}')">${c.status==='paused'?'▶ Ativar':'⏸ Pausar'}</button></td>
-    </tr>`).join('')}</tbody></table>
+  return head('Campanhas','Todas as campanhas das três plataformas. Busque, filtre, ordene e exporte.')+`
+  <div class="card" style="margin-bottom:12px;padding:12px">
+    <div class="row" style="flex-wrap:wrap;gap:8px">
+      <input class="inp" id="cq" placeholder="Buscar campanha..." style="max-width:250px" value="${esc(F.q)}" oninput="F.q=this.value;renderRows()">
+      <select class="inp" style="max-width:170px" onchange="F.plat=this.value;renderRows()">
+        <option value="all"${F.plat==='all'?' selected':''}>Todas plataformas</option>
+        ${platArr.map(p=>`<option value="${p}"${F.plat===p?' selected':''}>${PLAT[p].n}</option>`).join('')}</select>
+      <select class="inp" style="max-width:160px" onchange="F.status=this.value;renderRows()">
+        <option value="all"${F.status==='all'?' selected':''}>Todos os status</option>
+        <option value="active"${F.status==='active'?' selected':''}>Ativa</option>
+        <option value="paused"${F.status==='paused'?' selected':''}>Pausada</option>
+        <option value="learning"${F.status==='learning'?' selected':''}>Aprendendo</option></select>
+      <span style="flex:1"></span>
+      <button class="btn" onclick="exportCsv()">Exportar CSV</button>
+    </div>
+    <p class="muted" style="margin:8px 0 0;font-size:12px" id="ccount"></p>
+  </div>
+  <div class="card twrap" style="padding:6px">
+    <table><thead><tr>
+      ${[['name','Campanha'],['client','Cliente'],['plat','Plataforma'],['status','Status']].map(([k,l])=>
+        `<th><button onclick="sortBy('${k}')">${l}${F.sort===k?(F.dir===-1?' ↓':' ↑'):''}</button></th>`).join('')}
+      ${[['spend','Gasto'],['rev','Receita'],['roas','ROAS'],['cpa','CPA'],['ctr','CTR']].map(([k,l])=>
+        `<th style="text-align:right"><button onclick="sortBy('${k}')">${l}${F.sort===k?(F.dir===-1?' ↓':' ↑'):''}</button></th>`).join('')}
+      <th></th></tr></thead>
+    <tbody id="camprows"></tbody></table>
   </div>`;
 }
-
-function viewRadar(){
-  return head('Radar de Tendências','A máquina de inteligência: o que está vendendo e o que está viralizando no mundo.')+`
-  <h3 style="font-size:16px;margin:0 0 10px">Produtos em alta</h3>
-  <div class="grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:22px">
-    ${products.map(p=>`<div class="card"><div class="between"><div><b>${p.name}</b><p class="muted" style="margin:2px 0 0;font-size:12.5px">${p.cat} • ${p.mkt} • ${p.country}</p></div><span class="avatar" style="width:44px;height:44px;background:var(--brand-soft);color:var(--brand);font-size:16px" class="num">${p.score}</span></div>
-      ${spark(Array.from({length:7},()=>ri(30,100)))}
-      <div class="row" style="gap:16px;font-size:12.5px;margin-top:4px"><span>Cresc. 7d <b class="up">+${p.g}%</b></span><span>${BRL(p.pmin)}–${BRL(p.pmax)}</span><span>Concorrência <b>${p.comp}</b></span></div>
-      <p style="margin:12px 0 0;font-size:13px;background:var(--surface2);padding:11px;border-radius:11px">🔥 ${p.insight}</p></div>`).join('')}
-  </div>
-  <h3 style="font-size:16px;margin:0 0 10px">Vídeos em alta no mundo</h3>
-  <div class="grid" style="grid-template-columns:repeat(2,1fr)">
-    ${videos.map(v=>`<div class="card"><div class="between"><span class="pill v">${v.net}</span><div class="row" style="gap:12px;font-size:12px" class="muted"><span>👁 ${CMP(v.views)}</span><span class="up">▲ +${v.g}% 24h</span></div></div>
-      <p style="margin:8px 0 0;font-weight:650">${v.t}</p><p class="muted" style="margin:2px 0 0;font-size:12px">${v.fmt}</p>
-      <p style="margin:8px 0 0;font-size:13px"><b class="muted">Gancho (3s):</b> ${v.hook}</p><p style="margin:4px 0 0;font-size:13px"><b class="muted">Por que funciona:</b> ${v.why}</p></div>`).join('')}
-  </div>`;
+function renderRows(){
+  const rows=filteredCampaigns();const tb=document.getElementById('camprows');if(!tb)return;
+  const cnt=document.getElementById('ccount');
+  if(cnt)cnt.textContent=`${rows.length} campanha(s) • investimento ${BRL(sum(rows,c=>c.spend))}`;
+  tb.innerHTML=rows.length?rows.map(c=>`<tr>
+    <td><b>${esc(c.name)}</b></td>
+    <td class="muted">${esc((findClient(c.client)||{}).name||'')}</td>
+    <td>${platPill(c.plat)}</td><td>${statusPill(c.status)}</td>
+    <td style="text-align:right" class="num">${BRL(c.spend)}</td>
+    <td style="text-align:right" class="num">${BRL(c.rev)}</td>
+    <td style="text-align:right;font-weight:700" class="num">${c.roas}x</td>
+    <td style="text-align:right" class="num">${BRL(c.cpa)}</td>
+    <td style="text-align:right" class="num">${c.ctr}%</td>
+    <td style="text-align:right"><button class="btn sm" onclick="togglePause('${c.id}')">${c.status==='paused'?'Ativar':'Pausar'}</button></td>
+  </tr>`).join(''):`<tr><td colspan="10" style="text-align:center;padding:28px" class="muted">Nenhuma campanha encontrada com esses filtros.</td></tr>`;
+}
+function sortBy(k){if(F.sort===k)F.dir=-F.dir;else{F.sort=k;F.dir=-1;}render();}
+function exportCsv(){
+  const rows=filteredCampaigns();
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const head=['Campanha','Cliente','Plataforma','Status','Gasto','Receita','ROAS','CPA','CTR','Conversões'];
+  const body=rows.map(c=>[c.name,(findClient(c.client)||{}).name||'',PLAT[c.plat].n,c.status,
+    c.spend.toFixed(2),c.rev.toFixed(2),c.roas,c.cpa,c.ctr,c.conv].map(q).join(';'));
+  const csv='\uFEFF'+[head.map(q).join(';')].concat(body).join('\n');
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  const a=document.createElement('a');a.href=url;a.download='campanhas.csv';a.click();
+  URL.revokeObjectURL(url);toast('CSV exportado.');
 }
 
 function viewRecs(){
-  const t=totals(campaigns);
-  return head('Recomendações IA','Diagnóstico automático + ações priorizadas por impacto, com aplicar em 1 clique.')+`
+  const t=totals(allCampaigns());const recs=allRecs();
+  return head('Recomendações da IA','Diagnóstico automático e ações priorizadas por impacto, aplicáveis em um clique.')+`
   <div class="card anim" style="border-color:var(--brand);background:var(--brand-soft);margin-bottom:16px">
-    <div class="row" style="align-items:flex-start;gap:14px"><span class="avatar" style="width:42px;height:42px;background:linear-gradient(135deg,var(--brand),var(--brand2))">✨</span>
-    <div><h3 style="font-size:15px;color:var(--brand)">Diagnóstico do gestor virtual</h3>
-    <p style="margin:6px 0 0;font-size:13.5px">Nos últimos 30 dias você investiu <b>${BRL(t.spend)}</b> e gerou <b>${BRL(t.rev)}</b> — ROAS de <b>${t.roas}</b>. O remarketing sustenta o ROAS acima da média; a prospecção fria com CPA alto e criativos com fadiga queimam verba. Recomendo realocar verba para as vencedoras e trocar 2 criativos cansados nesta semana.</p></div></div>
+    <div class="row" style="align-items:flex-start;gap:14px">
+      <span class="avatar" style="width:42px;height:42px;background:linear-gradient(135deg,var(--brand),var(--brand2))">IA</span>
+      <div><h3 style="font-size:15px;color:var(--brand)">Diagnóstico do gestor virtual</h3>
+      <p style="margin:6px 0 0;font-size:13.5px">Nos últimos 30 dias você investiu <b>${BRL(t.spend)}</b> e gerou <b>${BRL(t.rev)}</b>, com ROAS de <b>${t.roas}</b>. O remarketing sustenta o retorno acima da média, enquanto a prospecção fria com CPA alto e os criativos com fadiga consomem verba sem retorno. Realoque verba para as campanhas vencedoras e troque dois criativos cansados nesta semana.</p></div></div>
   </div>
   <div class="grid" style="gap:10px">
-    ${recs.map(r=>`<div class="card between" style="align-items:flex-start">
-      <div style="min-width:0;flex:1"><div class="row" style="gap:8px;flex-wrap:wrap"><span style="color:var(--brand)">✨</span><b>${r.title}</b>
-        <span class="pill ${r.impact==='alto'?'b':'w'}">Impacto ${r.impact}</span>${platPill(r.plat)}${r.status==='applied'?'<span class="pill g">Aplicada</span>':''}</div>
-        <p class="muted" style="margin:8px 0 0;font-size:13px"><b style="color:var(--fg)">Por quê:</b> ${r.why}</p>
-        <p class="muted" style="margin:3px 0 0;font-size:13px"><b class="up">${r.gain}</b></p></div>
+    ${recs.filter(r=>r.status!=='dismissed').map(r=>`<div class="card between" style="align-items:flex-start">
+      <div style="min-width:0;flex:1">
+        <div class="row" style="gap:8px;flex-wrap:wrap"><b>${esc(r.title)}</b>
+          <span class="pill ${r.impact==='alto'?'b':'w'}">Impacto ${r.impact}</span>${platPill(r.plat)}
+          ${r.status==='applied'?'<span class="pill g">Aplicada</span>':''}</div>
+        <p class="muted" style="margin:8px 0 0;font-size:13px"><b style="color:var(--fg)">Por quê:</b> ${esc(r.why)}</p>
+        <p style="margin:3px 0 0;font-size:13px"><b class="up">${esc(r.gain)}</b></p></div>
       <div class="row" style="gap:8px">${r.status==='applied'
-        ?`<button class="btn sm" onclick="undoRec('${r.id}')">Desfazer</button>`
-        :`<button class="btn p sm" onclick="applyRec('${r.id}')">✓ Aplicar</button>`}</div>
+        ?`<button class="btn sm" onclick="setRec('${r.id}','open')">Desfazer</button>`
+        :`<button class="btn p sm" onclick="setRec('${r.id}','applied')">Aplicar</button>
+          <button class="btn sm" onclick="setRec('${r.id}','dismissed')">Dispensar</button>`}</div>
     </div>`).join('')}
   </div>`;
 }
-
-// ── conexões e metas (destinos do guia) ──
-function viewConnections(){
-  return head('Conexões','Contas de anúncios conectadas via OAuth. Modo agência com múltiplos clientes.')+`
-  <div class="grid" style="grid-template-columns:repeat(2,1fr)">
-    ${connections.map(x=>`<div class="card between"><div><p style="margin:0;font-weight:600">${x.acc}</p><div class="row" style="gap:6px;margin-top:6px">${platPill(x.plat)}${statusPill(x.status)}<span class="muted" style="font-size:12px">Última: ${x.sync}</span></div></div>
-      <button class="btn sm" onclick="syncConn('${x.id}')">↻ Sincronizar</button></div>`).join('')}
-  </div>`;
-}
-function viewGoals(){
-  return head('Metas & Previsões','Metas por cliente com barra de progresso e projeção de fim de mês.')+`
-  <div class="grid" style="grid-template-columns:repeat(3,1fr)">
-    ${goals.map(g=>{const pr=g.metric==='cpa'?Math.min(100,g.tgt/g.cur*100):Math.min(100,g.cur/g.tgt*100);
-      const ok=g.metric==='cpa'?g.proj<=g.tgt:g.proj>=g.tgt;const f=v=>g.metric==='budget'||g.metric==='cpa'?BRL(v):v+'x';
-      return `<div class="card"><b>${g.label}</b>
-      <div class="between" style="margin-top:12px;align-items:flex-end"><div><div class="lbl">Atual</div><div style="font-size:22px;font-weight:800" class="num">${f(g.cur)}</div></div><div style="text-align:right"><div class="lbl">Meta</div><b class="num">${f(g.tgt)}</b></div></div>
-      <div class="bar" style="margin-top:12px"><i style="width:${pr}%"></i></div>
-      <p style="margin:12px 0 0;font-size:12.5px;color:${ok?'var(--good)':'var(--warn)'}">▲ Projeção fim do mês: <b>${f(g.proj)}</b> — ${ok?'no ritmo da meta':'abaixo do necessário'}</p></div>`;}).join('')}
-  </div>`;
+function setRec(id,st){
+  S.recStatus[id]=st;save();
+  toast(st==='applied'?'Recomendação aplicada. Você pode desfazer.':st==='dismissed'?'Recomendação dispensada.':'Ação desfeita.');
+  if(st==='applied')pushNotif('Recomendação aplicada: '+(BASE_RECS.find(r=>r.id===id)||{}).title,'rule');
+  render();
 }
 
-// ── automações ──
+// ── assistente (chat) ──
+function aiAnswer(q){
+  const camps=allCampaigns();const t=totals(camps);const ql=q.toLowerCase();
+  const best=[...camps].sort((a,b)=>b.roas-a.roas)[0];
+  const worst=[...camps].sort((a,b)=>a.roas-b.roas)[0];
+  const paused=camps.filter(c=>c.status==='paused').length;
+  if(/roas|retorno/.test(ql))
+    return `Seu ROAS consolidado é ${t.roas}x nos últimos 30 dias: ${BRL(t.rev)} de receita sobre ${BRL(t.spend)} investidos. A melhor campanha é "${best.name}" com ${best.roas}x, e a pior é "${worst.name}" com ${worst.roas}x. Vale escalar as acima de 4x e revisar as abaixo de 1,5x.`;
+  if(/cpa|custo|caro/.test(ql))
+    return `O CPA médio está em ${BRL(t.cpa)} e o CPC em ${BRL(t.cpc)}. O maior ofensor é "${worst.name}", com CPA de ${BRL(worst.cpa)}. Pausar esse conjunto ou trocar o criativo derruba a média rapidamente.`;
+  if(/desperd|queima|verba|gast/.test(ql))
+    return `Você está desperdiçando principalmente em "${worst.name}": ${BRL(worst.spend)} investidos para ${BRL(worst.rev)} de retorno. Há ${paused} campanha(s) pausada(s) hoje. Sugiro realocar essa verba para "${best.name}", que tem ROAS de ${best.roas}x.`;
+  if(/criativ|fadiga|anúncio|video|vídeo/.test(ql))
+    return `Identifiquei criativos com sinal de fadiga: frequência acima de 5 combinada com queda de CTR. O caso mais crítico está em "Vídeo Depoimento", com CTR 38% menor em 14 dias. Suba variações novas ainda esta semana para evitar aumento de CPM.`;
+  if(/escal|crescer|aumentar/.test(ql))
+    return `Para escalar esta semana, comece por "${best.name}" (ROAS ${best.roas}x, frequência saudável): aumente a verba em 20% e acompanhe por 3 dias. Em paralelo, ative a regra "Escalar vencedora" para automatizar isso dentro dos limites de orçamento.`;
+  if(/campanha|quantas|status/.test(ql))
+    return `Você tem ${camps.length} campanhas em ${allClients().length} clientes: ${camps.filter(c=>c.status==='active').length} ativas, ${camps.filter(c=>c.status==='learning').length} em aprendizado e ${paused} pausadas. O investimento total é de ${BRL(t.spend)} com ${NUM(t.conv)} conversões.`;
+  if(/cliente|perfil/.test(ql))
+    return `Você gerencia ${allClients().length} perfis: ${allClients().map(c=>c.name).join(', ')}. Abra "Clientes" e escolha um perfil para ver o guia de gestão passo a passo, com o que já está feito e o que falta.`;
+  if(/tend|produto|viral|alta/.test(ql))
+    return `No radar de hoje, o destaque é "${PRODUCTS[0].name}" com score de demanda ${PRODUCTS[0].score} e crescimento de ${PRODUCTS[0].g}% em 7 dias. Em vídeo, o formato que mais cresce é depoimento em 9:16 com gancho de resultado. Veja a aba Radar para os detalhes.`;
+  return `Analisando suas contas: ${BRL(t.spend)} investidos, ${BRL(t.rev)} de receita, ROAS ${t.roas}x, CTR ${t.ctr}% e ${NUM(t.conv)} conversões nos últimos 30 dias. Posso detalhar por campanha, apontar onde há desperdício, sugerir o que escalar ou analisar criativos. É só perguntar.`;
+}
+const SUGGEST=['Como está meu ROAS?','Onde estou desperdiçando verba?','O que devo escalar essa semana?','Quais criativos estão com fadiga?'];
+function viewChat(){
+  const msgs=S.chat.length?S.chat:[{role:'ai',content:'Olá! Sou seu gestor de tráfego virtual. Posso analisar suas contas, apontar desperdício e sugerir o que escalar. O que você quer saber?'}];
+  return head('Assistente','Converse em português sobre os dados reais das suas contas.')+`
+  <div class="chatbox">
+    <div class="msgs card" id="msgs">
+      ${msgs.map(m=>`<div class="msg ${m.role==='me'?'me':''}">
+        <span class="ava">${m.role==='me'?'V':'IA'}</span><div class="bubble">${esc(m.content)}</div></div>`).join('')}
+    </div>
+    <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:10px">
+      ${SUGGEST.map(s=>`<button class="btn sm" onclick="sendChat('${s.replace(/'/g,"\\'")}')">${s}</button>`).join('')}
+      ${S.chat.length?`<button class="btn sm" onclick="clearChat()">Limpar conversa</button>`:''}
+    </div>
+    <form class="row" style="margin-top:10px;gap:8px" onsubmit="event.preventDefault();sendChat(document.getElementById('cin').value)">
+      <input class="inp" id="cin" placeholder="Pergunte sobre suas campanhas..." autocomplete="off">
+      <button class="btn p" type="submit">Enviar</button>
+    </form>
+  </div>`;
+}
+function sendChat(text){
+  text=(text||'').trim();if(!text)return;
+  S.chat=(S.chat.length?S.chat:[{role:'ai',content:'Olá! Sou seu gestor de tráfego virtual. Posso analisar suas contas, apontar desperdício e sugerir o que escalar. O que você quer saber?'}]);
+  S.chat.push({role:'me',content:text});
+  S.chat.push({role:'ai',content:aiAnswer(text)});
+  if(S.chat.length>40)S.chat=S.chat.slice(-40);
+  save();render();
+  const m=document.getElementById('msgs');if(m)m.scrollTop=m.scrollHeight;
+}
+function clearChat(){S.chat=[];save();render();}
+
+// ── criativos ──
+function viewCreatives(){
+  return head('Criativos','Gere headlines, textos, chamadas e ângulos adaptados por plataforma.')+`
+  <div class="grid col2" style="grid-template-columns:1fr 1.3fr">
+    <div class="card" style="align-self:start">
+      <h3 style="font-size:15px;margin-bottom:10px">Gerador de criativos</h3>
+      <label class="lbl" for="prod">Produto ou oferta</label>
+      <input class="inp" id="prod" placeholder="Ex.: suplemento de colágeno" style="margin:6px 0 12px">
+      <label class="lbl" for="plt">Plataforma</label>
+      <select class="inp" id="plt" style="margin:6px 0 12px">
+        <option value="meta">Meta (Facebook e Instagram)</option>
+        <option value="google">Google</option><option value="tiktok">TikTok</option></select>
+      <label class="lbl" for="tom">Tom</label>
+      <select class="inp" id="tom" style="margin:6px 0 14px">
+        <option value="direto">Direto e comercial</option><option value="prova">Prova social</option>
+        <option value="urgencia">Urgência e escassez</option><option value="educativo">Educativo</option></select>
+      <button class="btn p" style="width:100%" onclick="genCreative()">Gerar criativos</button>
+    </div>
+    <div id="creativeOut">${S.creatives.length?renderCreative(S.creatives[0]):
+      `<div class="card" style="text-align:center;padding:40px 20px" class="muted">
+        <p class="muted" style="margin:0;font-size:13.5px">Descreva o produto ao lado para gerar textos prontos para anúncio.</p></div>`}</div>
+  </div>
+  ${S.creatives.length>1?`<h3 style="font-size:15px;margin:20px 0 10px">Gerados anteriormente</h3>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+      ${S.creatives.slice(1,7).map((c,i)=>`<div class="card clickable" onclick="showCreative(${i+1})">
+        <b style="font-size:13.5px">${esc(c.product)}</b>
+        <p class="muted" style="margin:4px 0 0;font-size:12.5px">${PLAT[c.plat].n} • ${esc(c.tone)}</p>
+        <p style="margin:8px 0 0;font-size:12.5px">${esc(c.heads[0])}</p></div>`).join('')}</div>`:''}`;
+}
+function genCreative(){
+  const product=(document.getElementById('prod').value||'').trim();
+  if(product.length<2){toast('Escreva o nome do produto ou da oferta.');return;}
+  const plat=document.getElementById('plt').value,tone=document.getElementById('tom').value;
+  const P=product;
+  const byTone={
+    direto:{heads:[`${P} com entrega rápida`,`Leve ${P} hoje com desconto`,`${P}: a escolha certa`],
+      texts:[`Chegou a hora de resolver isso de vez. ${P} entrega o resultado que você procura, com garantia de 7 dias e entrega para todo o Brasil.`,
+        `Sem enrolação: ${P} faz o que promete. Peça agora e receba em poucos dias.`]},
+    prova:{heads:[`Mais de 10 mil pessoas usam ${P}`,`${P} aprovado por quem já testou`,`Por que todo mundo está comprando ${P}`],
+      texts:[`Mais de 10 mil clientes já escolheram ${P} e a nota média é 4,8. Veja por que tanta gente recomenda e faça o seu pedido.`,
+        `"Achei que era exagero, mas ${P} mudou minha rotina." Depoimentos reais de quem usa todos os dias.`]},
+    urgencia:{heads:[`Últimas unidades de ${P}`,`${P}: oferta acaba hoje`,`Restam poucas peças de ${P}`],
+      texts:[`O estoque de ${P} está acabando e essa condição encerra à meia-noite. Garanta o seu antes que volte ao preço normal.`,
+        `Promoção relâmpago em ${P}. Quando acabar, acabou — e o próximo lote sai mais caro.`]},
+    educativo:{heads:[`Como escolher ${P} sem errar`,`O que ninguém te conta sobre ${P}`,`${P}: guia rápido`],
+      texts:[`Antes de comprar ${P}, veja os 3 pontos que fazem diferença no resultado. O terceiro é o que a maioria ignora.`,
+        `Entenda como ${P} funciona na prática e por que o modo de uso muda completamente o resultado.`]}
+  };
+  const t=byTone[tone];
+  const angles={meta:['Prova social com depoimento em vídeo','Antes e depois','Oferta com prazo limitado'],
+    google:['Intenção de busca com palavra-chave exata','Comparativo com concorrente','Frete e garantia em destaque'],
+    tiktok:['Vídeo nativo de cliente real','Gancho de problema nos 3 primeiros segundos','Demonstração em loop']};
+  const item={product:P,plat,tone,heads:t.heads,texts:t.texts,
+    descs:['Entrega rápida e garantia de 7 dias.','Pague em até 12x sem juros.'],
+    ctas:plat==='google'?['Comprar agora','Ver oferta','Saiba mais']:['Quero o meu','Comprar agora','Ver mais'],
+    angles:angles[plat]};
+  S.creatives=[item].concat(S.creatives).slice(0,7);save();
+  render();toast('Criativos gerados.');
+}
+function showCreative(i){document.getElementById('creativeOut').innerHTML=renderCreative(S.creatives[i]);}
+function renderCreative(c){
+  const block=(title,items)=>`<div style="margin-top:14px"><div class="lbl" style="margin-bottom:6px">${title}</div>
+    ${items.map(x=>`<div class="between" style="background:var(--surface2);padding:9px 11px;border-radius:10px;margin-bottom:6px;font-size:13px">
+      <span style="min-width:0">${esc(x)}</span>
+      <button class="btn sm" onclick="copyText('${x.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">Copiar</button></div>`).join('')}</div>`;
+  return `<div class="card anim"><div class="between">
+      <div><b>${esc(c.product)}</b><p class="muted" style="margin:2px 0 0;font-size:12.5px">${PLAT[c.plat].n} • tom ${esc(c.tone)}</p></div>
+      ${platPill(c.plat)}</div>
+    ${block('Headlines',c.heads)}${block('Textos principais',c.texts)}
+    ${block('Descrições',c.descs)}${block('Chamadas para ação',c.ctas)}${block('Ângulos de anúncio',c.angles)}</div>`;
+}
+function copyText(t){
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>toast('Copiado.'),()=>toast('Não foi possível copiar.'));
+  else toast('Copiado.');
+}
+
 function viewAutomations(){
-  return head('Automações','Regras se → então rodando em background, com preview (dry-run) e guardrails de orçamento.')+`
-  <div class="card between anim" style="border-color:color-mix(in srgb,var(--good) 40%,var(--border));background:color-mix(in srgb,var(--good) 7%,transparent);margin-bottom:14px">
-    <div class="row" style="gap:10px"><span style="color:var(--good);font-size:18px">🛡️</span><p class="muted" style="margin:0;font-size:13px">A IA nunca gasta sozinha. Toda regra tem piso, teto e variação máxima por disparo — e você pode simular antes de ativar.</p></div>
+  return head('Automações','Regras que rodam em segundo plano, com simulação prévia e limites de orçamento.')+`
+  <div class="card" style="border-color:color-mix(in srgb,var(--good) 40%,var(--border));background:color-mix(in srgb,var(--good) 7%,transparent);margin-bottom:14px">
+    <p class="muted" style="margin:0;font-size:13px">Nenhuma regra gasta sozinha. Toda automação tem piso, teto e variação máxima por disparo, e você pode simular antes de ativar.</p>
   </div>
   <div class="grid" style="gap:10px">
-    ${rules.map(r=>`<div class="card">
-      <div class="between"><div><div class="row" style="gap:8px"><span style="color:var(--brand)">⚙️</span><b>${r.name}</b><span class="pill ${r.on?'g':'m'}">${r.on?'Ativa':'Pausada'}</span></div>
-        <p style="margin:8px 0 0;font-size:13.5px"><b class="muted">SE</b> ${r.cond} &nbsp;<b class="muted">ENTÃO</b> ${r.act}</p>
-        <p class="muted" style="margin:4px 0 0;font-size:12px">Guardrails: piso ${BRL(r.floor)} • teto ${BRL(r.cap)} • variação máx. ${r.maxpct}% • disparos: ${r.fires}${r.last?' • último: '+r.last:''}</p></div>
-      <div class="row" style="gap:8px;align-items:flex-start">
-        <button class="btn sm" onclick="toggleRule('${r.id}')">${r.on?'Pausar':'Ativar'}</button>
-        <button class="btn sm" onclick="previewRule('${r.id}')">👁 Preview</button>
-        <button class="btn p sm" onclick="runRule('${r.id}')">▶ Rodar</button></div>
-      </div>
-      <div id="pv-${r.id}"></div>
-    </div>`).join('')}
+    ${allRules().map(r=>`<div class="card">
+      <div class="between">
+        <div style="min-width:0"><div class="row" style="gap:8px"><b>${esc(r.name)}</b>
+          <span class="pill ${r.on?'g':'m'}">${r.on?'Ativa':'Pausada'}</span></div>
+          <p style="margin:8px 0 0;font-size:13.5px"><b class="muted">SE</b> ${esc(r.cond)} &nbsp;<b class="muted">ENTÃO</b> ${esc(r.act)}</p>
+          <p class="muted" style="margin:4px 0 0;font-size:12px">Piso ${BRL(r.floor)} • teto ${BRL(r.cap)} • variação máxima ${r.maxpct}% • ${r.fires} disparo(s)${r.last?' • último '+r.last:''}</p></div>
+        <div class="row" style="gap:8px;align-items:flex-start">
+          <button class="btn sm" onclick="toggleRule('${r.id}')">${r.on?'Pausar':'Ativar'}</button>
+          <button class="btn sm" onclick="previewRule('${r.id}')">Simular</button>
+          <button class="btn p sm" onclick="runRule('${r.id}')">Rodar agora</button></div>
+      </div><div id="pv-${r.id}"></div></div>`).join('')}
   </div>`;
 }
-function toggleRule(id){const r=rules.find(x=>x.id===id);r.on=!r.on;toast(r.on?'Regra ativada.':'Regra pausada.');go('automations');}
-function runRule(id){const r=rules.find(x=>x.id===id);r.fires++;r.last='agora mesmo';toast(`Regra "${r.name}" disparou em 2 conjuntos.`);go('automations');}
+function toggleRule(id){
+  const r=allRules().find(x=>x.id===id);
+  S.rules[id]=Object.assign({},S.rules[id],{on:!r.on});save();
+  toast(!r.on?'Regra ativada.':'Regra pausada.');render();
+}
+function runRule(id){
+  const r=allRules().find(x=>x.id===id);
+  S.rules[id]=Object.assign({},S.rules[id],{fires:r.fires+1,last:'agora mesmo'});save();
+  pushNotif(`Regra "${r.name}" disparou em 2 conjuntos.`,'rule');
+  toast(`Regra "${r.name}" executada em 2 conjuntos.`);render();
+}
 function previewRule(id){
-  const box=document.getElementById('pv-'+id);
+  const box=document.getElementById('pv-'+id);if(!box)return;
   if(box.innerHTML){box.innerHTML='';return;}
-  const rows=[
-    {n:'Prospecção Fria 3',c:'Pausar (CPA R$ 92 > R$ 60)',ok:true},
-    {n:'Escala Vencedora 3',c:'Verba R$ 250 → R$ 300 (+20%)',ok:true},
-    {n:'Catálogo Dinâmico',c:'Verba +40% bloqueada pelo teto de variação (20%)',ok:false},
-  ];
-  box.innerHTML=`<div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)"><div class="lbl" style="margin-bottom:8px">Preview (dry-run) — sem alterar nada</div>
-    ${rows.map(x=>`<div class="between" style="padding:8px 11px;border-radius:10px;background:${x.ok?'var(--surface2)':'color-mix(in srgb,var(--bad) 9%,transparent)'};margin-bottom:6px">
-      <div><b style="font-size:13px">${x.n}</b><p class="muted" style="margin:1px 0 0;font-size:12.5px">${x.c}</p></div>${x.ok?'<span class="pill g">OK</span>':'<span class="pill b">Bloqueado</span>'}</div>`).join('')}</div>`;
+  const rows=[{n:'Prospecção Fria 3',c:'Pausar — CPA de R$ 92 acima do limite de R$ 60',ok:true},
+    {n:'Escala Vencedora 3',c:'Verba de R$ 250 para R$ 300 (aumento de 20%)',ok:true},
+    {n:'Catálogo Dinâmico',c:'Aumento de 40% bloqueado pelo limite de variação de 20%',ok:false}];
+  box.innerHTML=`<div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)">
+    <div class="lbl" style="margin-bottom:8px">Simulação — nada é alterado</div>
+    ${rows.map(x=>`<div class="between" style="padding:8px 11px;border-radius:10px;margin-bottom:6px;background:${x.ok?'var(--surface2)':'color-mix(in srgb,var(--bad) 9%,transparent)'}">
+      <div><b style="font-size:13px">${x.n}</b><p class="muted" style="margin:1px 0 0;font-size:12.5px">${x.c}</p></div>
+      ${x.ok?'<span class="pill g">Permitido</span>':'<span class="pill b">Bloqueado</span>'}</div>`).join('')}</div>`;
 }
 
-// ── planejador ──
+function viewRadar(){
+  return head('Radar de tendências','O que está vendendo e o que está viralizando, com leitura pronta para o anúncio.')+`
+  <h3 style="font-size:16px;margin:0 0 10px">Produtos em alta</h3>
+  <div class="grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:22px">
+    ${PRODUCTS.map((p,i)=>`<div class="card"><div class="between">
+      <div><b>${esc(p.name)}</b><p class="muted" style="margin:2px 0 0;font-size:12.5px">${p.cat} • ${p.mkt} • ${p.country}</p></div>
+      <span class="avatar num" style="width:44px;height:44px;background:var(--brand-soft);color:var(--brand);font-size:16px">${p.score}</span></div>
+      ${spark(i*37+11)}
+      <div class="row" style="gap:16px;font-size:12.5px;margin-top:4px;flex-wrap:wrap">
+        <span>Crescimento 7d <b class="up">+${p.g}%</b></span><span>${BRL(p.pmin)} a ${BRL(p.pmax)}</span>
+        <span>Concorrência <b>${p.comp}</b></span></div>
+      <p style="margin:12px 0 0;font-size:13px;background:var(--surface2);padding:11px;border-radius:11px">${esc(p.insight)}</p></div>`).join('')}
+  </div>
+  <h3 style="font-size:16px;margin:0 0 10px">Vídeos em alta no mundo</h3>
+  <div class="grid" style="grid-template-columns:repeat(2,1fr)">
+    ${VIDEOS.map(v=>`<div class="card"><div class="between"><span class="pill v">${v.net}</span>
+      <div class="row muted" style="gap:12px;font-size:12px"><span>${CMP(v.views)} views</span><span class="up">+${v.g}% em 24h</span></div></div>
+      <p style="margin:8px 0 0;font-weight:650">${esc(v.t)}</p>
+      <p class="muted" style="margin:2px 0 0;font-size:12px">${esc(v.fmt)}</p>
+      <p style="margin:8px 0 0;font-size:13px"><b class="muted">Gancho:</b> ${esc(v.hook)}</p>
+      <p style="margin:4px 0 0;font-size:13px"><b class="muted">Por que funciona:</b> ${esc(v.why)}</p></div>`).join('')}
+  </div>`;
+}
+
 function viewPlanner(){
-  return head('Planejador de Postagem','Melhores janelas por rede + análise honesta do seu vídeo antes de publicar.')+`
+  return head('Planejador de postagem','Melhores janelas por rede e análise do seu vídeo antes de publicar.')+`
   <div class="grid col2" style="grid-template-columns:1fr 1fr">
-    <div class="card"><h3 style="font-size:15px;margin-bottom:12px">📅 Melhores janelas de postagem</h3>
-      ${windows.map(w=>`<div style="padding:10px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px">
-        <div class="between"><b style="font-size:13.5px">${w.net}</b><div class="row" style="gap:6px">${w.hours.map(h=>`<span class="pill v">🕐 ${h}</span>`).join('')}</div></div>
+    <div class="card" style="align-self:start"><h3 style="font-size:15px;margin-bottom:12px">Melhores janelas de postagem</h3>
+      ${WINDOWS.map(w=>`<div style="padding:10px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px">
+        <div class="between"><b style="font-size:13.5px">${w.net}</b>
+        <div class="row" style="gap:6px">${w.hours.map(h=>`<span class="pill v">${h}</span>`).join('')}</div></div>
         <p class="muted" style="margin:6px 0 0;font-size:12px">${w.note}</p></div>`).join('')}
-      <p class="muted" style="margin:10px 0 0;font-size:12px">Dica: publique orgânico nessas janelas e concentre os lances pagos nos horários que mais convertem no seu mapa de calor.</p></div>
-    <div class="card"><h3 style="font-size:15px;margin-bottom:10px">✨ Analisar meu vídeo antes de postar</h3>
-      <label class="lbl" for="vdesc">Descreva o vídeo (tema, gancho, formato)</label>
-      <textarea id="vdesc" rows="4" placeholder="Ex.: vídeo mostrando antes/depois de um produto de skincare, começa com a pessoa reclamando da pele..." style="width:100%;margin-top:6px;padding:10px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);color:var(--fg);font-family:inherit;font-size:13.5px;resize:vertical"></textarea>
-      <button class="btn p" style="width:100%;margin-top:10px" onclick="analyzeVideo()">Analisar com IA</button>
+      <p class="muted" style="margin:10px 0 0;font-size:12px">Publique o orgânico nessas janelas e concentre os lances pagos nos horários que mais convertem no mapa de calor do dashboard.</p></div>
+    <div class="card" style="align-self:start"><h3 style="font-size:15px;margin-bottom:10px">Analisar meu vídeo antes de postar</h3>
+      <label class="lbl" for="vdesc">Descreva o vídeo: tema, gancho e formato</label>
+      <textarea class="inp" id="vdesc" rows="4" style="margin-top:6px;resize:vertical"
+        placeholder="Ex.: vídeo mostrando antes e depois de um produto de skincare, começa com a pessoa reclamando da pele..."></textarea>
+      <button class="btn p" style="width:100%;margin-top:10px" onclick="analyzeVideo()">Analisar</button>
       <div id="vresult"></div></div>
   </div>`;
 }
 function analyzeVideo(){
-  const desc=(document.getElementById('vdesc').value||'').trim();
-  if(desc.length<8){toast('Descreva o vídeo com um pouco mais de detalhe.');return;}
-  const strong=desc.length>40;const score=strong?ri(68,86):ri(42,60);
+  const d=(document.getElementById('vdesc').value||'').trim();
+  if(d.length<10){toast('Descreva o vídeo com um pouco mais de detalhe.');return;}
+  const strong=d.length>60,mid=d.length>30;
+  const score=strong?78:mid?64:48;
   const verdict=strong
-    ?'Boa base: a ideia tem gancho, mas os 3 primeiros segundos precisam entregar o conflito antes do contexto. Corte a introdução.'
-    :'Precisa de mais substância. Sem um gancho claro nos 3s iniciais, a retenção cai e o CPM sobe. Reescreva a abertura.';
-  const hooks=['"Ninguém te conta isso sobre [tema]..."','"Eu testei por 7 dias — o resultado me surpreendeu."','"Se você faz isso, está perdendo dinheiro todo dia."'];
+    ?'Boa base: a ideia tem gancho, mas os 3 primeiros segundos precisam entregar o conflito antes do contexto. Corte a introdução e comece pelo problema.'
+    :mid?'Tem potencial, porém está genérico. Escolha um ângulo único e mostre o resultado logo no início, não no fim.'
+    :'Precisa de mais substância. Sem um gancho claro nos 3 primeiros segundos a retenção cai e o custo por mil sobe. Reescreva a abertura.';
   const plans=[
-    {net:'TikTok',title:'O erro de tráfego que te custa caro (testei)',tags:'#trafegopago #ads',time:'19h–22h',fmt:'9:16, legenda queimada, corte a cada 2s',tip:'Suba como Spark Ad o criativo de maior retenção orgânica.'},
-    {net:'Reels',title:'3 erros que queimam sua verba de anúncio',tags:'#gestordetrafego #meta',time:'12h e 20h',fmt:'9:16, texto grande, CTA no fim',tip:'Use Advantage+ com público amplo; deixe o algoritmo achar o comprador.'},
-    {net:'YouTube Shorts',title:'Como dobrei o ROAS em 14 dias',tags:'#shorts #googleads',time:'18h–21h',fmt:'Vertical, 45s, thumbnail forte',tip:'Reaproveite como discovery ad segmentando por interesse.'},
-  ];
+    {net:'TikTok',title:'O erro que está custando caro no seu anúncio',tags:'#trafegopago #ads #marketing',time:'19h às 22h',fmt:'9:16, legenda na tela, corte a cada 2 segundos',tip:'Suba como anúncio o criativo com maior retenção orgânica.'},
+    {net:'Instagram Reels',title:'3 erros que queimam sua verba de anúncio',tags:'#gestordetrafego #meta #instagram',time:'12h e 20h',fmt:'9:16, texto grande, chamada no final',tip:'Use público amplo e deixe o algoritmo encontrar o comprador.'},
+    {net:'YouTube Shorts',title:'Como dobrei o retorno em 14 dias',tags:'#shorts #googleads #roas',time:'18h às 21h',fmt:'Vertical, até 45 segundos, capa forte',tip:'Reaproveite o mesmo vídeo como anúncio de descoberta por interesse.'}];
   document.getElementById('vresult').innerHTML=`<div class="anim" style="margin-top:14px">
-    <div style="padding:12px;border-radius:12px;background:var(--surface2)"><div class="between"><b style="font-size:13.5px">Veredito honesto</b><span class="pill ${score>=65?'g':'w'}">Nota ${score}/100</span></div><p class="muted" style="margin:6px 0 0;font-size:13px">${verdict}</p></div>
-    <p class="lbl" style="margin:14px 0 6px">3 ganchos sugeridos</p>${hooks.map(h=>`<p style="margin:3px 0;font-size:13px" class="muted">• ${h}</p>`).join('')}
-    <p class="lbl" style="margin:14px 0 6px">Plano por rede</p>
+    <div style="padding:12px;border-radius:12px;background:var(--surface2)">
+      <div class="between"><b style="font-size:13.5px">Avaliação</b>
+      <span class="pill ${score>=70?'g':score>=55?'w':'b'}">Nota ${score} de 100</span></div>
+      <p class="muted" style="margin:6px 0 0;font-size:13px">${verdict}</p></div>
+    <div class="lbl" style="margin:14px 0 6px">Três ganchos sugeridos</div>
+    ${['"Ninguém te conta isso sobre esse assunto."','"Testei por 7 dias e o resultado me surpreendeu."','"Se você faz isso, está perdendo dinheiro todo dia."']
+      .map(h=>`<p class="muted" style="margin:3px 0;font-size:13px">• ${h}</p>`).join('')}
+    <div class="lbl" style="margin:14px 0 6px">Plano por rede</div>
     ${plans.map(p=>`<div style="padding:11px;border:1px solid var(--border);border-radius:11px;margin-bottom:7px">
       <b style="font-size:13px">${p.net} — ${p.title}</b>
-      <p class="muted" style="margin:4px 0 0;font-size:12px">Hashtags: ${p.tags} • Horário: ${p.time}</p>
-      <p class="muted" style="margin:1px 0 0;font-size:12px">Formato: ${p.fmt}</p>
-      <p style="margin:4px 0 0;font-size:12px;color:var(--brand)">💰 Tráfego pago: ${p.tip}</p></div>`).join('')}
+      <p class="muted" style="margin:4px 0 0;font-size:12px">Hashtags ${p.tags} • Horário ${p.time}</p>
+      <p class="muted" style="margin:1px 0 0;font-size:12px">Formato ${p.fmt}</p>
+      <p style="margin:4px 0 0;font-size:12px;color:var(--brand)">Tráfego pago: ${p.tip}</p></div>`).join('')}
   </div>`;
 }
 
-// ── roteamento ──
+function viewConnections(){
+  return head('Conexões','Contas de anúncios ligadas a cada cliente.')+`
+  <div class="grid" style="grid-template-columns:repeat(2,1fr)">
+    ${connections.map(x=>`<div class="card between">
+      <div style="min-width:0"><p style="margin:0;font-weight:600">${esc(x.acc)}</p>
+        <div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap">${platPill(x.plat)}${statusPill(x.status)}
+        <span class="muted" style="font-size:12px">Atualizado ${x.sync}</span></div></div>
+      <button class="btn sm" onclick="syncConn('${x.id}')">${x.status==='active'?'Sincronizar':'Reconectar'}</button></div>`).join('')}
+  </div>`;
+}
+function syncConn(id){
+  const c=connections.find(x=>x.id===id);if(!c)return;
+  const was=c.status;c.status='active';c.sync='agora mesmo';
+  toast(was==='active'?'Conta sincronizada.':'Conta reconectada com sucesso.');render();
+}
+
+function viewGoals(){
+  return head('Metas e previsões','Acompanhe o progresso e a projeção de fim de mês pelo ritmo atual.')+`
+  <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+    ${allGoals().map(g=>{
+      const pr=g.metric==='cpa'?Math.min(100,g.tgt/g.cur*100):Math.min(100,g.cur/g.tgt*100);
+      const ok=g.metric==='cpa'?g.proj<=g.tgt:g.proj>=g.tgt;
+      const f=v=>g.metric==='roas'?v+'x':BRL(v);
+      const cl=findClient(g.client);
+      return `<div class="card"><b>${esc(g.label)}</b>
+        <p class="muted" style="margin:2px 0 0;font-size:12px">${cl?esc(cl.name):''}</p>
+        <div class="between" style="margin-top:12px;align-items:flex-end">
+          <div><div class="lbl">Atual</div><div class="num" style="font-size:22px;font-weight:800">${f(g.cur)}</div></div>
+          <div style="text-align:right"><div class="lbl">Meta</div><b class="num">${f(g.tgt)}</b></div></div>
+        <div class="bar" style="margin-top:12px"><i style="width:${pr}%"></i></div>
+        <p style="margin:12px 0 0;font-size:12.5px;color:${ok?'var(--good)':'var(--warn)'}">
+          Projeção de fim de mês: <b>${f(g.proj)}</b> — ${ok?'no ritmo da meta':'abaixo do necessário'}</p></div>`;}).join('')}
+  </div>`;
+}
+
+// ── relatório do cliente (imprimível) ──
+function viewReport(id){
+  const c=findClient(id);
+  if(!c)return head('Relatório','Cliente não encontrado.');
+  const cc=allCampaigns().filter(x=>x.client===id);const t=totals(cc);
+  const segs=platArr.map(p=>({c:PLAT[p].c,n:PLAT[p].n,v:sum(cc.filter(x=>x.plat===p),x=>x.spend)})).filter(s=>s.v>0);
+  const top=[...cc].sort((a,b)=>b.roas-a.roas).slice(0,5);
+  const now=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  return `<div class="no-print between" style="margin-bottom:14px">
+      <p class="link" onclick="go('clientes/${id}')" style="margin:0">← Voltar ao perfil</p>
+      <button class="btn p" onclick="printReport('${id}')">Imprimir ou salvar em PDF</button></div>
+    <div class="card" style="padding:28px">
+      <div class="between" style="border-bottom:2px solid ${c.color};padding-bottom:16px;margin-bottom:20px">
+        <div class="row"><span class="avatar" style="background:${c.color}">${esc(c.name[0])}</span>
+          <div><h1 style="font-size:22px">${esc(c.name)}</h1>
+          <p class="muted" style="margin:2px 0 0;font-size:13px">Relatório de desempenho • ${now}</p></div></div>
+        <div style="text-align:right"><div class="lbl">Período</div><b style="font-size:13.5px">Últimos 30 dias</b></div></div>
+      <div class="kpis" style="margin-bottom:20px">
+        ${kpi('Investimento',BRL(t.spend))}${kpi('Receita',BRL(t.rev))}${kpi('ROAS',t.roas+'x')}
+        ${kpi('Conversões',NUM(t.conv))}${kpi('CPA',BRL(t.cpa))}${kpi('CTR',t.ctr+'%')}</div>
+      <h3 style="font-size:15px;margin-bottom:10px">Resumo</h3>
+      <p style="font-size:13.5px;margin:0 0 20px">No período, ${esc(c.name)} investiu ${BRL(t.spend)} e gerou ${BRL(t.rev)} em receita, o que representa um retorno de ${t.roas}x sobre o investimento. Foram ${NUM(t.conv)} conversões, com custo médio de ${BRL(t.cpa)} por conversão e taxa de cliques de ${t.ctr}%. ${top[0]?'A campanha de melhor desempenho foi "'+esc(top[0].name)+'", com ROAS de '+top[0].roas+'x.':''}</p>
+      <h3 style="font-size:15px;margin-bottom:10px">Investimento por plataforma</h3>
+      <div style="margin-bottom:20px">
+        ${segs.map(s=>`<div style="margin-bottom:8px">
+          <div class="between" style="font-size:13px"><span>${s.n}</span><b class="num">${BRL(s.v)}</b></div>
+          <div class="bar" style="margin-top:4px"><i style="width:${(s.v/t.spend*100).toFixed(0)}%;background:${s.c}"></i></div></div>`).join('')}</div>
+      <h3 style="font-size:15px;margin-bottom:10px">Campanhas do período</h3>
+      <div class="twrap"><table><thead><tr><th>Campanha</th><th>Plataforma</th>
+        <th style="text-align:right">Gasto</th><th style="text-align:right">Receita</th><th style="text-align:right">ROAS</th></tr></thead>
+        <tbody>${top.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${platPill(x.plat)}</td>
+          <td style="text-align:right" class="num">${BRL(x.spend)}</td>
+          <td style="text-align:right" class="num">${BRL(x.rev)}</td>
+          <td style="text-align:right;font-weight:700" class="num">${x.roas}x</td></tr>`).join('')}</tbody></table></div>
+      <p class="muted" style="margin:24px 0 0;font-size:11.5px;text-align:center;border-top:1px solid var(--border);padding-top:14px">
+        Relatório gerado por TrafegoAI</p>
+    </div>`;
+}
+function printReport(id){
+  S.guide[id]=Object.assign({},S.guide[id],{report:true});save();
+  window.print();
+}
+
+// ── novo cliente ──
+function openNewClient(){
+  document.getElementById('modalHost').innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()">
+    <div class="card"><h3 style="font-size:17px;margin-bottom:14px">Novo cliente</h3>
+      <div class="grid" style="gap:10px">
+        <div><label class="lbl" for="nc_name">Nome do cliente</label><input class="inp" id="nc_name" placeholder="Ex.: Padaria do Bairro" style="margin-top:4px"></div>
+        <div><label class="lbl" for="nc_seg">Segmento</label><input class="inp" id="nc_seg" placeholder="Ex.: Alimentação" style="margin-top:4px"></div>
+        <div><label class="lbl" for="nc_owner">Responsável</label><input class="inp" id="nc_owner" placeholder="Nome do contato" style="margin-top:4px"></div>
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+          <div><label class="lbl" for="nc_mail">E-mail</label><input class="inp" id="nc_mail" type="email" placeholder="contato@empresa.com" style="margin-top:4px"></div>
+          <div><label class="lbl" for="nc_fone">Telefone</label><input class="inp" id="nc_fone" placeholder="(00) 90000-0000" style="margin-top:4px"></div></div>
+        <div><label class="lbl">Cor do perfil</label>
+          <div class="row" style="gap:8px;margin-top:6px" id="colorPick">
+            ${['#6d4aff','#16a34a','#d97706','#dc2626','#0ea5e9','#db2777'].map((c,i)=>
+              `<button type="button" onclick="pickColor('${c}')" data-c="${c}" class="ccell" style="width:32px;height:32px;border-radius:9px;background:${c};border:3px solid ${i===0?'var(--fg)':'transparent'}"></button>`).join('')}</div></div>
+      </div>
+      <div class="row" style="gap:8px;margin-top:18px;justify-content:flex-end">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn p" onclick="saveClient()">Criar cliente</button></div></div></div>`;
+  setTimeout(()=>{const el=document.getElementById('nc_name');if(el)el.focus();},50);
+}
+let newColor='#6d4aff';
+function pickColor(c){
+  newColor=c;
+  document.querySelectorAll('.ccell').forEach(b=>b.style.border='3px solid '+(b.dataset.c===c?'var(--fg)':'transparent'));
+}
+function closeModal(){document.getElementById('modalHost').innerHTML='';}
+function saveClient(){
+  const v=id=>(document.getElementById(id).value||'').trim();
+  const name=v('nc_name');
+  if(name.length<2){toast('Informe o nome do cliente.');return;}
+  const id='u'+Date.now().toString(36);
+  const months=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const d=new Date();
+  S.clients.push({id,name,color:newColor,owner:v('nc_owner')||'—',email:v('nc_mail')||'—',
+    phone:v('nc_fone')||'—',seg:v('nc_seg')||'Não informado',since:months[d.getMonth()]+'/'+d.getFullYear()});
+  save();closeModal();
+  pushNotif(`Cliente "${name}" adicionado à carteira.`,'info');
+  toast('Cliente criado.');go('clientes/'+id);
+}
+
+function guideAct(cid,step,to){
+  S.guide[cid]=Object.assign({},S.guide[cid],{[step]:true});save();
+  if(to)go(to);else{toast('Passo concluído.');render();}
+}
+function togglePause(id){
+  const c=allCampaigns().find(x=>x.id===id);if(!c)return;
+  const next=c.status==='paused'?'active':'paused';
+  S.campaignStatus[id]=next;save();
+  toast(next==='paused'?`"${c.name}" pausada.`:`"${c.name}" ativada.`);
+  renderRows();
+}
+
+// ═══ ROTEAMENTO POR HASH ═══
 const NAV=[
   ['dashboard','Dashboard','M3 13h8V3H3zM13 21h8V3h-8zM3 21h8v-6H3z'],
-  ['clients','Clientes','M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75'],
-  ['campaigns','Campanhas','M3 11l19-9-9 19-2-8-8-2z'],
-  ['recs','Recomendações IA','M12 2l2.4 7.4H22l-6 4.4 2.3 7.2L12 16.6 5.7 21l2.3-7.2-6-4.4h7.6z'],
-  ['automations','Automações','M6 3v12 M18 9v12 M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M18 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M6 15a9 9 0 0 1 9-9'],
-  ['radar','Radar de Tendências','M12 12m-10 0a10 10 0 1 0 20 0 10 10 0 1 0-20 0 M12 12m-6 0a6 6 0 1 0 12 0 6 6 0 1 0-12 0 M12 12l4-4'],
-  ['planner','Planejador de Postagem','M8 2v4 M16 2v4 M3 8h18 M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M12 13v4 M10 15h4'],
+  ['clientes','Clientes','M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75'],
+  ['campanhas','Campanhas','M3 11l19-9-9 19-2-8-8-2z'],
+  ['recomendacoes','Recomendações IA','M12 2l2.4 7.4H22l-6 4.4 2.3 7.2L12 16.6 5.7 21l2.3-7.2-6-4.4h7.6z'],
+  ['chat','Assistente','M21 11.5a8.4 8.4 0 0 1-9 8.4 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.1A8.4 8.4 0 0 1 4 11.5a8.4 8.4 0 0 1 8.5-8.4 8.4 8.4 0 0 1 8.5 8.4z'],
+  ['automacoes','Automações','M6 3v12 M18 9v12 M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M18 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M6 15a9 9 0 0 1 9-9'],
+  ['criativos','Criativos','M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M21 15l-5-5L5 21'],
+  ['radar','Radar de tendências','M12 12m-10 0a10 10 0 1 0 20 0 10 10 0 1 0-20 0 M12 12m-6 0a6 6 0 1 0 12 0 6 6 0 1 0-12 0 M12 12l4-4'],
+  ['planejador','Planejador','M8 2v4 M16 2v4 M3 8h18 M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M12 13v4 M10 15h4'],
+  ['metas','Metas e previsões','M12 12m-9 0a9 9 0 1 0 18 0 9 9 0 1 0-18 0 M12 12m-4 0a4 4 0 1 0 8 0 4 4 0 1 0-8 0 M12 12l7-7'],
+  ['conexoes','Conexões','M9 17H7A5 5 0 0 1 7 7h2 M15 7h2a5 5 0 0 1 0 10h-2 M8 12h8'],
 ];
-let current='dashboard';
+// qual item do menu fica aceso para cada rota
+const NAV_PARENT={clientes:'clientes',relatorio:'clientes'};
+
+const VIEWS={dashboard:viewDashboard,clientes:viewClients,campanhas:viewCampaigns,
+  recomendacoes:viewRecs,chat:viewChat,automacoes:viewAutomations,criativos:viewCreatives,
+  radar:viewRadar,planejador:viewPlanner,metas:viewGoals,conexoes:viewConnections};
+
+function parseHash(){
+  const h=(location.hash||'').replace(/^#\/?/,'');
+  const [v,p]=h.split('/');
+  return {view:v||'dashboard',param:p||null};
+}
+function go(path){
+  location.hash='#/'+path;
+  if(window.innerWidth<=880)closeMenu();
+}
 function renderNav(){
+  const {view}=parseHash();
+  const active=NAV_PARENT[view]||view;
   document.getElementById('nav').innerHTML=NAV.map(([id,label,path])=>
-    `<button class="${current===id||(current==='client'&&id==='clients')||(['connections','goals'].includes(current)&&id==='clients')?'on':''}" onclick="go('${id}')">
+    `<button class="${active===id?'on':''}" onclick="go('${id}')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg>${label}</button>`).join('');
 }
-const VIEWS={dashboard:viewDashboard,clients:viewClients,campaigns:viewCampaigns,radar:viewRadar,recs:viewRecs,connections:viewConnections,goals:viewGoals,automations:viewAutomations,planner:viewPlanner};
-let param=null;
-function go(v,p){current=v;param=p||null;renderNav();
-  const view=document.getElementById('view');
-  view.innerHTML = v==='client'?viewClient(p):(VIEWS[v]?VIEWS[v]():viewDashboard());
-  view.classList.remove('anim');void view.offsetWidth;view.classList.add('anim');
-  window.scrollTo(0,0);
-  if(window.innerWidth<=880) closeMenu();
+function render(){
+  const {view,param}=parseHash();
+  const host=document.getElementById('view');
+  let html;
+  if(view==='clientes'&&param)html=viewClient(param);
+  else if(view==='relatorio')html=viewReport(param);
+  else html=(VIEWS[view]||viewDashboard)();
+  host.innerHTML=html;
+  renderNav();renderBell();
+  host.classList.remove('anim');void host.offsetWidth;host.classList.add('anim');
+  if(view==='campanhas')renderRows();
+  if(view==='dashboard')bindChart();
+  if(view==='chat'){const m=document.getElementById('msgs');if(m)m.scrollTop=m.scrollHeight;}
+  document.title=(view==='dashboard'?'Dashboard':view.charAt(0).toUpperCase()+view.slice(1))+' • TrafegoAI';
+}
+window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0);});
+
+// ═══ SINO E NOTIFICAÇÕES ═══
+let bellOpen=false;
+function renderBell(){
+  const n=unreadCount();const dot=document.getElementById('bellDot');
+  if(dot){dot.hidden=n===0;dot.textContent=n>9?'9+':n;}
+  const panel=document.getElementById('bellPanel');
+  if(!panel)return;
+  panel.innerHTML=bellOpen?`<div class="panel">
+    <div class="between" style="padding:6px 8px 8px"><b style="font-size:13px">Notificações</b>
+      ${unreadCount()?`<button class="link" style="background:none;border:0;font-size:12px" onclick="markAllRead()">Marcar como lidas</button>`:''}</div>
+    ${allNotifs().slice(0,8).map(x=>`<div class="notif ${(S.read||[]).includes(x.id)?'':'un'}">
+      <p style="margin:0">${esc(x.msg)}</p><p class="muted" style="margin:2px 0 0;font-size:11.5px">${esc(x.at)}</p></div>`).join('')
+      ||'<p class="muted" style="padding:10px;font-size:13px;margin:0">Nada por aqui.</p>'}</div>`:'';
+}
+function markAllRead(){S.read=allNotifs().map(n=>n.id);save();renderBell();}
+
+// ═══ AÇÕES GERAIS ═══
+function toast(m){
+  const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
+  clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2400);
+}
+function currentTheme(){
+  return document.documentElement.getAttribute('data-theme')||
+    (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+}
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('themeBtn').innerHTML=t==='dark'
+    ?'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>'
+    :'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+}
+function toggleMenu(){
+  document.getElementById('side').classList.toggle('open');
+  document.getElementById('scrim').classList.toggle('on');
+}
+function closeMenu(){
+  document.getElementById('side').classList.remove('open');
+  document.getElementById('scrim').classList.remove('on');
 }
 
-// ── ações ──
-function toggleTheme(){
-  const r=document.documentElement;
-  const cur=r.getAttribute('data-theme')|| (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
-  const next=cur==='dark'?'light':'dark';r.setAttribute('data-theme',next);setThemeIcon(next);
-}
-function setThemeIcon(t){document.getElementById('themeBtn').innerHTML= t==='dark'
-  ?'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>'
-  :'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';}
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2400);}
-function togglePause(id){const c=campaigns.find(x=>x.id===id);c.status=c.status==='paused'?'active':'paused';toast(c.status==='paused'?'Campanha pausada.':'Campanha ativada.');go('campaigns');}
-function applyRec(id){recs.find(r=>r.id===id).status='applied';toast('Recomendação aplicada. Você pode desfazer.');go('recs');}
-function undoRec(id){recs.find(r=>r.id===id).status='open';toast('Ação desfeita.');go('recs');}
-function syncConn(id){const c=connections.find(x=>x.id===id);c.status='active';c.sync='agora mesmo';toast('Conta sincronizada.');go('connections');}
-function guideAct(cid,step,to){guideDone[cid]=guideDone[cid]||{};guideDone[cid][step]=true;
-  if(to&&VIEWS[to]) go(to); else {toast('Passo concluído.');go('client',cid);}}
-function toggleMenu(){document.getElementById('side').classList.toggle('open');document.getElementById('scrim').classList.toggle('on');}
-function closeMenu(){document.getElementById('side').classList.remove('open');document.getElementById('scrim').classList.remove('on');}
+// ═══ INICIALIZAÇÃO ═══
+document.getElementById('menuBtn').onclick=toggleMenu;
+document.getElementById('scrim').onclick=closeMenu;
+document.getElementById('themeBtn').onclick=()=>{
+  const t=currentTheme()==='dark'?'light':'dark';
+  S.theme=t;save();applyTheme(t);
+};
+document.getElementById('bellBtn').onclick=e=>{
+  e.stopPropagation();bellOpen=!bellOpen;
+  if(bellOpen)setTimeout(()=>markAllRead(),1200);
+  renderBell();
+};
+document.addEventListener('click',e=>{
+  if(bellOpen&&!e.target.closest('#bellPanel')&&!e.target.closest('#bellBtn')){bellOpen=false;renderBell();}
+});
 
-// init
-setThemeIcon(document.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
-renderNav();go('dashboard');
+applyTheme(S.theme||currentTheme());
+const syncTxt='Atualizado há 6 min';
+document.getElementById('syncInfo').textContent=syncTxt;
+document.getElementById('topSync').textContent=syncTxt;
+if(!location.hash)location.hash='#/dashboard';
+render();
+
+// instalação como aplicativo (quando servido por HTTPS)
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});
+}
 </script>
 
 </body>

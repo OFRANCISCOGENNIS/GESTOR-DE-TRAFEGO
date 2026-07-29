@@ -1,0 +1,20 @@
+{
+  "name": "TrafegoAI — Gestor de tráfego pago",
+  "short_name": "TrafegoAI",
+  "description": "Google, Meta e TikTok Ads em um só painel, otimizados por IA.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0d16",
+  "theme_color": "#6d4aff",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
