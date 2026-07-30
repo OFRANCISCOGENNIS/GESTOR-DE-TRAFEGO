@@ -105,9 +105,11 @@ limite de chamadas ou bloqueio de rede até `graph.facebook.com`.
 
 ```bash
 cd trafegoai/apps/api
-cp .env.example .env         # preencha META_APP_ID e META_APP_SECRET
-npx prisma migrate dev       # cria as tabelas
-npm run start:dev            # sobe a API
+cp .env.example .env             # preencha META_APP_ID e META_APP_SECRET
+npx prisma migrate deploy        # cria as tabelas
+npm run seed                     # dados iniciais (opcional)
+npm run verify:db                # confere que a gravação não duplica
+npm run start:dev                # sobe a API
 ```
 
 No app da Meta, cadastre a URI de redirecionamento **exatamente** igual à do
@@ -138,6 +140,9 @@ Depois é só chamar `POST /connections/meta/authorize` com o `clientId`, abrir 
 - **O que já funciona:** todo o código da Meta, com 14 testes cobrindo a
   conversão dos dados e a classificação de erros, mais o comando
   `npm run meta:doctor` para você validar as credenciais em um minuto.
+- **Verificado contra um Postgres real:** a migração inicial aplica sem
+  divergência, o seed roda, e o `npm run verify:db` confirma que reprocessar a
+  mesma janela de datas atualiza os valores em vez de duplicar linhas.
 - **O que não pude verificar:** a chamada real à `graph.facebook.com`. O ambiente
   onde o código foi escrito bloqueia esse domínio por política de rede, então o
   caminho de rede só será confirmado quando você rodar o `meta:doctor` com um

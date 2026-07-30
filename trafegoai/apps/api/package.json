@@ -11,6 +11,7 @@
     "prisma:migrate": "prisma migrate deploy",
     "seed": "ts-node prisma/seed.ts",
     "meta:doctor": "ts-node -r dotenv/config scripts/meta-doctor.ts",
+    "verify:db": "ts-node -r dotenv/config scripts/verify-db.ts",
     "test": "jest"
   },
   "dependencies": {
