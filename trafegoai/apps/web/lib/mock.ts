@@ -7,10 +7,11 @@
 // ────────────────────────────────────────────────────────────────────────────
 import { deriveKpi, sumMetrics, pctChange, round, type MetricDaily } from "./metrics";
 import type {
-  Ad, AdSet, Anomaly, AuditEntry, Campaign, ChatMessage, Client, Connection,
-  Creative, DashboardSummary, FunnelStep, Goal, HeatCell, Highlight, Kpi,
-  Notification, Plan, PlanId, Platform, PostingWindow, Product, Recommendation,
-  Report, Rule, TimePoint, PlatformSplit, TrendingVideo, VideoAnalysis,
+  Ad, AdSet, Anomaly, AuditEntry, Campaign, ChatMessage, Client, ClientProfile,
+  Connection, Creative, DashboardSummary, FunnelStep, Goal, HeatCell, Highlight,
+  Kpi, ManagementStep, Notification, Plan, PlanId, Platform, PostingWindow,
+  Product, Recommendation, Report, Rule, TimePoint, PlatformSplit, TrendingVideo,
+  VideoAnalysis,
 } from "./types";
 
 // ── RNG determinístico (mesmos dados a cada boot => sem mismatch de hidratação) ─
@@ -273,6 +274,51 @@ function dashboard(period: string): {
   return { summary: { current: curK, deltas }, timeseries, funnel, split, heatmap, highlights };
 }
 
+// ── Perfil de cliente (gestão do perfil de alguém — modo agência) ───────────────
+const CLIENT_META: Record<string, { owner: string; email: string; phone: string; segment: string; since: string }> = {
+  c1: { owner: "Marina Alves", email: "marina@lojaaurora.com.br", phone: "(11) 98888-1201", segment: "E-commerce de moda", since: "jan/2025" },
+  c2: { owner: "Rafael Nunes", email: "rafael@fitprosupps.com", phone: "(21) 97777-3410", segment: "Suplementos / saúde", since: "mar/2025" },
+  c3: { owner: "Camila Rocha", email: "camila@studiobelapele.com", phone: "(31) 96666-5588", segment: "Estética / skincare", since: "set/2025" },
+};
+
+// Vincula uma conexão a um cliente pelo nome (palavras significativas do nome).
+function connectionsOfClient(client: Client, all: Connection[]): Connection[] {
+  const keys = client.name.split(" ").filter((w) => w.length > 3).map((w) => w.toLowerCase());
+  return all.filter((cn) => keys.some((k) => cn.accountName.toLowerCase().includes(k)));
+}
+
+function clientProfile(id: string): ClientProfile | null {
+  const d = getDb();
+  const client = d.clients.find((c) => c.id === id);
+  if (!client) return null;
+
+  const campaigns = d.campaigns.filter((c) => c.clientId === id);
+  const kpi = deriveKpi(sumMetrics(campaigns.map((c) => sumMetrics(d.series[c.id].slice(-30)))));
+  const connections = connectionsOfClient(client, d.connections);
+  const goals = d.goals.filter((g) => g.clientId === id);
+  const openRecommendations = d.recommendations.filter((r) => r.status === "open").length;
+  const appliedRecs = d.recommendations.filter((r) => r.status === "applied").length;
+  const activeRules = d.rules.filter((r) => r.enabled).length;
+  const hasReport = d.reports.some((r) => r.clientId === id);
+  const contact = CLIENT_META[id] ?? { owner: "—", email: "—", phone: "—", segment: "—", since: "—" };
+
+  const connectionsOk = connections.length > 0 && connections.every((c) => c.status === "active");
+  const guide: ManagementStep[] = [
+    { id: "accounts", title: "Revisar contas conectadas", description: connectionsOk ? `${connections.length} conta(s) ativas e sincronizando.` : `Há conta(s) expiradas ou com erro — reautentique para não perder dados.`, done: connectionsOk, href: "/connections", cta: "Ver conexões" },
+    { id: "goals", title: "Definir metas do cliente", description: goals.length ? `${goals.length} meta(s) configurada(s) com projeção de fim de mês.` : "Nenhuma meta definida ainda — comece por ROAS ou CPA-alvo.", done: goals.length > 0, href: "/goals", cta: "Definir metas" },
+    { id: "diagnosis", title: "Ler o diagnóstico da IA", description: "Veja o que vai bem e o que queima verba neste perfil, em linguagem simples.", done: false, href: "/recommendations", cta: "Abrir diagnóstico" },
+    { id: "recs", title: "Aplicar recomendações", description: appliedRecs ? `${appliedRecs} recomendação(ões) já aplicada(s); ${openRecommendations} em aberto.` : `${openRecommendations} recomendação(ões) esperando ação.`, done: appliedRecs > 0, href: "/recommendations", cta: "Ver recomendações" },
+    { id: "rules", title: "Ativar automações com guardrails", description: activeRules ? `${activeRules} regra(s) ativa(s) protegendo o orçamento.` : "Sem automações ativas — crie regras se→então com preview.", done: activeRules > 0, href: "/automations", cta: "Configurar automações" },
+    { id: "report", title: "Agendar relatório white-label", description: hasReport ? "Relatório do cliente pronto para compartilhar por link ou PDF." : "Nenhum relatório para este cliente ainda.", done: hasReport, href: "/reports", cta: "Gerar relatório" },
+  ];
+
+  const doneCount = guide.filter((s) => s.done).length;
+  const score = Math.round((doneCount / guide.length) * 100);
+  const label = score >= 80 ? "Perfil saudável" : score >= 50 ? "Precisa de atenção" : "Requer ação urgente";
+
+  return { client, contact, kpi, connections, campaigns, goals, openRecommendations, activeRules, hasReport, guide, health: { score, label } };
+}
+
 // ── Radar de tendências (curado / mock) ─────────────────────────────────────────
 function trendingProducts(): Product[] {
   const base = [
@@ -374,13 +420,58 @@ export async function mockRequest(method: string, path: string, body?: any): Pro
 
   // clients / connections
   if (route === "/clients") return d.clients;
-  if (route === "/connections") return d.connections;
-  if (route.startsWith("/connections/") && route.endsWith("/sync") && method === "POST") {
+  if (route.match(/^\/clients\/[^/]+\/profile$/) && method === "GET") {
+    const profile = clientProfile(route.split("/")[2]);
+    if (!profile) throw new Error("Cliente não encontrado");
+    return profile;
+  }
+  if (route === "/connections") {
+    // acrescenta o nome do cliente, como faz a API real
+    return d.connections.map((c) => ({
+      ...c,
+      clientName: d.clients.find((cl) => connectionsOfClient(cl, [c]).length)?.name,
+    }));
+  }
+  // Sem backend não há credenciais de plataforma nenhuma: dizemos isso na cara.
+  if (route === "/connections/status") {
+    const semBackend =
+      "Conectar contas de verdade exige a API rodando com as credenciais da plataforma. " +
+      "Veja INTEGRACAO_APIS.md.";
+    return {
+      meta: { configured: false, comoConfigurar: semBackend },
+      google: { configured: false, comoConfigurar: semBackend },
+      tiktok: { configured: false, comoConfigurar: semBackend },
+    };
+  }
+  if (route.match(/^\/connections\/[^/]+\/authorize$/) && method === "POST") {
+    throw new Error(
+      "Sem a API configurada não dá para autorizar uma conta real. Suba o backend com as credenciais da plataforma.",
+    );
+  }
+  if (route.match(/^\/connections\/[^/]+\/sync$/) && method === "POST") {
     const id = route.split("/")[2];
     const cn = d.connections.find((c) => c.id === id);
-    if (cn) { cn.lastSync = "agora mesmo"; cn.status = "active"; }
-    logAudit("Sincronizou conta", cn?.accountName || id);
-    return cn;
+    if (!cn) throw new Error("Conexão não encontrada");
+    cn.lastSync = "agora mesmo";
+    cn.status = "active";
+    logAudit("Sincronizou conta", cn.accountName);
+    const camps = d.campaigns.filter(() => true).slice(0, 4);
+    return {
+      connectionId: cn.id,
+      accountName: cn.accountName,
+      days: body?.days ?? 30,
+      campaigns: camps.length,
+      rows: camps.length * 30,
+      spend: round(sumMetrics(camps.map((c) => sumMetrics(d.series[c.id].slice(-30)))).spend, 2),
+      revenue: round(sumMetrics(camps.map((c) => sumMetrics(d.series[c.id].slice(-30)))).revenue, 2),
+    };
+  }
+  if (route.match(/^\/connections\/[^/]+\/disconnect$/) && method === "POST") {
+    const id = route.split("/")[2];
+    const cn = d.connections.find((c) => c.id === id);
+    if (cn) cn.status = "expired";
+    logAudit("Desconectou conta", cn?.accountName || id);
+    return { ok: true };
   }
 
   // campaigns

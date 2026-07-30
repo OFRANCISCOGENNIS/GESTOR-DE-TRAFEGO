@@ -156,12 +156,56 @@ export interface Client {
   logoColor: string;
 }
 
+export interface ManagementStep {
+  id: string;
+  title: string;
+  description: string;
+  done: boolean;
+  href: string;
+  cta: string;
+}
+
+export interface ClientProfile {
+  client: Client;
+  contact: { owner: string; email: string; phone: string; segment: string; since: string };
+  kpi: Kpi;
+  connections: Connection[];
+  campaigns: Campaign[];
+  goals: Goal[];
+  openRecommendations: number;
+  activeRules: number;
+  hasReport: boolean;
+  guide: ManagementStep[];
+  health: { score: number; label: string };
+}
+
 export interface Connection {
   id: string;
   platform: Platform;
   accountName: string;
   status: "active" | "expired" | "error";
   lastSync: string;
+  clientId?: string;
+  clientName?: string;
+  externalAccountId?: string | null;
+}
+
+/** Diz se a plataforma tem credenciais configuradas na API. */
+export interface PlatformStatus {
+  configured: boolean;
+  comoConfigurar: string | null;
+}
+export type ConnectionsStatus = Record<Platform, PlatformStatus>;
+
+/** Resultado de uma sincronização de métricas. */
+export interface SyncResult {
+  connectionId: string;
+  accountName: string;
+  days: number;
+  campaigns: number;
+  rows: number;
+  spend: number;
+  revenue: number;
 }
 
 export interface Product {

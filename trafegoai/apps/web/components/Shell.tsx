@@ -5,7 +5,7 @@ import clsx from "clsx";
 import {
   LayoutDashboard, Radar, CalendarClock, Megaphone, Sparkles, MessageSquare,
   Workflow, Images, Target, FileText, PlugZap, ScrollText, CreditCard,
-  Bell, Moon, Sun, LogOut, TrendingUp,
+  Bell, Moon, Sun, LogOut, TrendingUp, Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useStore } from "@/store/useStore";
@@ -13,6 +13,7 @@ import { isDemo } from "@/lib/api";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/clients", label: "Clientes", icon: Users },
   { href: "/campaigns", label: "Campanhas", icon: Megaphone },
   { href: "/recommendations", label: "Recomendações IA", icon: Sparkles },
   { href: "/chat", label: "Assistente", icon: MessageSquare },
@@ -48,7 +49,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </Link>
         <nav className="flex-1 space-y-0.5 overflow-y-auto">
           {NAV.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href;
+            const active = pathname === href || pathname.startsWith(href + "/");
             return (
               <Link key={href} href={href}
                 className={clsx("flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",

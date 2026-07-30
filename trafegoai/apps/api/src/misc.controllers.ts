@@ -2,18 +2,54 @@ import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { PrismaService } from "./prisma.service";
 import { MetricsService } from "./metrics/metrics.service";
 import { LlmService } from "./common/llm.service";
+import { deriveKpi, sumMetrics } from "./common/metrics.util";
 
 @Controller()
 export class MiscController {
   constructor(private prisma: PrismaService, private metrics: MetricsService, private llm: LlmService) {}
 
   @Get("clients") clients() { return this.prisma.client.findMany(); }
-  @Get("connections") connections() { return this.prisma.connection.findMany(); }
-  @Post("connections/:id/sync")
-  sync(@Param("id") id: string) {
-    // Sincronização manual. Enfileira job de sync no worker (BullMQ) na versão real.
-    return this.prisma.connection.update({ where: { id }, data: { status: "active", lastSync: new Date() } });
+
+  // Perfil de cliente (gestão do perfil de alguém — modo agência).
+  @Get("clients/:id/profile")
+  async clientProfile(@Param("id") id: string) {
+    const client = await this.prisma.client.findUnique({ where: { id } });
+    if (!client) return null;
+    const [connections, campaigns, goals, rules, reports, recs] = await Promise.all([
+      this.prisma.connection.findMany({ where: { clientId: id } }),
+      this.prisma.campaign.findMany({ where: { clientId: id }, include: { metrics: true } }),
+      this.prisma.goal.findMany({ where: { clientId: id } }),
+      this.prisma.rule.findMany(),
+      this.prisma.report.findMany({ where: { clientId: id } }),
+      this.prisma.recommendation.findMany(),
+    ]);
+    const kpi = deriveKpi(sumMetrics(campaigns.flatMap((c) => c.metrics as any)));
+    const connectionsOk = connections.length > 0 && connections.every((c) => c.status === "active");
+    const activeRules = rules.filter((r) => r.enabled).length;
+    const appliedRecs = recs.filter((r) => r.status === "applied").length;
+    const openRecommendations = recs.filter((r) => r.status === "open").length;
+    const guide = [
+      { id: "accounts", title: "Revisar contas conectadas", description: connectionsOk ? `${connections.length} conta(s) ativas.` : "Há conta(s) com problema — reautentique.", done: connectionsOk, href: "/connections", cta: "Ver conexões" },
+      { id: "goals", title: "Definir metas do cliente", description: goals.length ? `${goals.length} meta(s) configurada(s).` : "Nenhuma meta definida ainda.", done: goals.length > 0, href: "/goals", cta: "Definir metas" },
+      { id: "diagnosis", title: "Ler o diagnóstico da IA", description: "Veja o que vai bem e o que queima verba.", done: false, href: "/recommendations", cta: "Abrir diagnóstico" },
+      { id: "recs", title: "Aplicar recomendações", description: `${appliedRecs} aplicada(s), ${openRecommendations} em aberto.`, done: appliedRecs > 0, href: "/recommendations", cta: "Ver recomendações" },
+      { id: "rules", title: "Ativar automações com guardrails", description: activeRules ? `${activeRules} regra(s) ativa(s).` : "Sem automações ativas.", done: activeRules > 0, href: "/automations", cta: "Configurar automações" },
+      { id: "report", title: "Agendar relatório white-label", description: reports.length ? "Relatório pronto para compartilhar." : "Nenhum relatório ainda.", done: reports.length > 0, href: "/reports", cta: "Gerar relatório" },
+    ];
+    const doneCount = guide.filter((s) => s.done).length;
+    const score = Math.round((doneCount / guide.length) * 100);
+    return {
+      client, kpi, connections, goals, openRecommendations, activeRules,
+      hasReport: reports.length > 0,
+      campaigns: campaigns.map((c) => ({ ...c, kpi: deriveKpi(sumMetrics(c.metrics as any)) })),
+      contact: { owner: "—", email: "—", phone: "—", segment: "—", since: "—" },
+      guide,
+      health: { score, label: score >= 80 ? "Perfil saudável" : score >= 50 ? "Precisa de atenção" : "Requer ação urgente" },
+    };
   }
+
+  // As rotas de conexão vivem em connections/connections.controller.ts,
+  // que implementa o OAuth real e a sincronização das métricas.
 
   @Get("goals") goals() { return this.prisma.goal.findMany(); }
   @Get("audit") audit() { return this.prisma.auditLog.findMany({ orderBy: { at: "desc" }, take: 50 }); }

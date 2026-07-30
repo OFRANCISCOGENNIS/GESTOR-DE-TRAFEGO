@@ -8,10 +8,15 @@ import { PrismaClient } from "@prisma/client";
 import { RealtimeRedisPublisher } from "./realtime/realtime.gateway";
 import { applyBudgetChange } from "./rules/guardrails";
 import { detectAnomaly } from "./common/metrics.util";
+import { MetaConnector } from "./connectors/meta.connector";
+import { MetaSyncService } from "./connections/meta.sync.service";
 
 const connection = { url: process.env.REDIS_URL || "redis://localhost:6379" } as any;
 const prisma = new PrismaClient();
 const publisher = new RealtimeRedisPublisher();
+const metaConnector = new MetaConnector();
+// O serviço só usa os métodos do Prisma, então o client puro serve aqui fora do Nest.
+const metaSync = new MetaSyncService(prisma as any, metaConnector);
 
 async function runRulesEngine() {
   const rules = await prisma.rule.findMany({ where: { enabled: true } });
@@ -34,9 +39,17 @@ async function main() {
   await rulesQueue.add("run", {}, { repeat: { pattern: "*/15 * * * *" } });
 
   new Worker("metrics-sync", async () => {
-    // TODO(integração): iterar conexões ativas, chamar connector.fetchDailyMetrics
-    // e persistir MetricDaily normalizado. Detecção de anomalia via detectAnomaly.
-    console.log("[worker] sync de métricas executado");
+    if (!metaConnector.isConfigured) {
+      console.log("[worker] Meta sem credenciais (META_APP_ID/META_APP_SECRET) — sync ignorado");
+      return;
+    }
+    // Puxa os últimos 7 dias: cobre reprocessamento de atribuição da Meta,
+    // que ajusta números de dias anteriores. O upsert evita duplicar.
+    const results = await metaSync.syncAll(7);
+    for (const r of results) {
+      await publisher.publish("sync.done", r);
+    }
+    console.log(`[worker] sync da Meta concluído em ${results.length} conexão(ões)`);
   }, { connection });
 
   new Worker("rules-engine", async () => {

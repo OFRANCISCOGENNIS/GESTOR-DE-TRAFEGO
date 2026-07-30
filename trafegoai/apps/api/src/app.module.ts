@@ -10,6 +10,9 @@ import {
   RulesController, RadarController,
 } from "./api.controllers";
 import { MiscController } from "./misc.controllers";
+import { ConnectionsController } from "./connections/connections.controller";
+import { MetaSyncService } from "./connections/meta.sync.service";
+import { MetaConnector } from "./connectors/meta.connector";
 
 @Module({
   imports: [
@@ -20,8 +23,12 @@ import { MiscController } from "./misc.controllers";
   ],
   controllers: [
     AuthController, DashboardController, CampaignsController,
-    InsightsController, RulesController, RadarController, MiscController,
+    InsightsController, RulesController, RadarController,
+    ConnectionsController, MiscController,
   ],
-  providers: [PrismaService, MetricsService, LlmService, RealtimeGateway],
+  providers: [
+    PrismaService, MetricsService, LlmService, RealtimeGateway,
+    MetaConnector, MetaSyncService,
+  ],
 })
 export class AppModule {}
